@@ -1,0 +1,30 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "Backend de app de formularios para Granjas del Sur de Chile",
+  "main": "dist/index.js",
+  "author": "Alexander Barrios",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch index.ts",
+    "migration:create": "tsx ./scripts/migrations.ts create"
+  },
+  "license": "MIT",
+  "private": true,
+  "devDependencies": {
+    "@types/node": "^20.11.20",
+    "@typescript-eslint/eslint-plugin": "^6.4.0",
+    "eslint": "^8.0.1",
+    "eslint-config-standard-with-typescript": "^43.0.1",
+    "eslint-plugin-import": "^2.25.2",
+    "eslint-plugin-n": "^15.0.0 || ^16.0.0 ",
+    "eslint-plugin-promise": "^6.0.0",
+    "nodemon": "^3.1.0",
+    "tsx": "^4.7.1",
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {
+    "chalk": "4",
+    "pg": "8.11.3"
+  }
+}
