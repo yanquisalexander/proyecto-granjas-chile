@@ -46,6 +46,8 @@ class WebServer {
           optionsSuccessStatus: 200
         })
       ])
+    } else {
+      Loggers.WebServer.writeLog('ENABLE_CORS is set to false on environment variables. Skipping CORS middleware...')
     }
     return this.app
   }

@@ -23,7 +23,6 @@ class Logger {
 
   writeLog (message: string): void {
     const logMessage = `[${new Date().toLocaleString()}] ${message}\n`
-
     fs.appendFile(this.logFilePath, logMessage, (err) => {
       if (err) {
         console.error('Error writing to log file:', err)
