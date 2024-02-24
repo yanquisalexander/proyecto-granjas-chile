@@ -7,7 +7,8 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch index.ts",
-    "migration:create": "tsx ./scripts/migrations.ts create"
+    "migration:create": "tsx ./scripts/migrations.ts create",
+    "db:migrate": "tsx ./scripts/migrations.ts migrate"
   },
   "license": "MIT",
   "private": true,

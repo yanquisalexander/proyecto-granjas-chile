@@ -57,7 +57,7 @@ class Database {
     try {
       await Database.pool.connect()
     } catch (error) {
-      console.error(chalk.red('[DATABASE MANAGER]'), error)
+      Configuration.IS_PRODUCTION ? console.error(chalk.red('[DATABASE MANAGER]'), 'An error occurred while connecting to the database. Check the logs for more details') : console.error(chalk.red('[DATABASE MANAGER]'), error)
       Loggers.Database.writeLog((error as Error).message)
       throw error
     }

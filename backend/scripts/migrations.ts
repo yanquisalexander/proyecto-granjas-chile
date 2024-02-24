@@ -1,3 +1,4 @@
+import Database from '@/lib/DatabaseManager'
 import chalk from 'chalk'
 import fs from 'node:fs'
 import path from 'node:path'
@@ -26,8 +27,46 @@ export async function rollbackMigration (): Promise<void> {
 }
 
 export async function migrate (): Promise<void> {
-  // Implementa la lógica para aplicar las migraciones pendientes
-  console.log('Migración realizada')
+  console.log('Migrating database...')
+  try {
+    await Database.connect()
+    console.log('Database connected')
+  } catch (error) {
+    console.error(chalk.red('[MIGRATIONS]'), 'Error connecting to the database')
+  }
+
+  const migrationsDirectory = path.join(__dirname, 'db/migrations')
+  const migrationHistoryPath = path.join(__dirname, 'db', '.migration_history')
+
+  const migrationFiles = fs.readdirSync(migrationsDirectory).filter((file) => file.endsWith('.sql'))
+  const appliedMigrations = fs.existsSync(migrationHistoryPath)
+    ? fs.readFileSync(migrationHistoryPath, 'utf-8').split('\n').filter(Boolean)
+    : []
+
+  const pendingMigrations = migrationFiles.filter((migration) => !appliedMigrations.includes(migration))
+
+  console.log(chalk.grey('[MIGRATIONS]'), `Trying to apply ${pendingMigrations.length} migration(s)`)
+  for (const migrationFile of pendingMigrations) {
+    const migrationPath = path.join(migrationsDirectory, migrationFile)
+    const migrationContent = fs.readFileSync(migrationPath, 'utf-8')
+    console.log(chalk.grey('[MIGRATIONS]'), `Applying migration ${migrationFile}`)
+    console.log(chalk.gray(`>>> ${migrationContent}`))
+
+    try {
+      await Database.runMigration(migrationContent, migrationFile)
+      console.log(chalk.grey('[MIGRATIONS]'), `Migration ${migrationFile} applied`)
+
+      // Agregar la migración al historial
+      fs.appendFileSync(migrationHistoryPath, `${migrationFile}\n`)
+    } catch (error) {
+      console.error(chalk.red('[MIGRATIONS]'), `Error applying migration ${migrationFile}`)
+      console.error(chalk.red('[MIGRATIONS]'), error)
+      break
+    }
+  }
+
+  console.log(chalk.grey('[MIGRATIONS]'), 'All migrations applied')
+  process.exit(0)
 }
 
 export async function deleteDatabase (): Promise<void> {
@@ -55,17 +94,16 @@ if (command === 'create') {
     process.exit(1)
   }
 
-  /*
-    si tiene mas argumentos despues del nombre de la migracion,
-    los une en un solo string separado por guiones bajos y
-    lo asigna a migrationName, por ejemplo:
-    Crear Tabla de Usuarios => crear_tabla_de_usuarios
-  */
-
   if (process.argv.length > 4) {
     const migrationNameArray = process.argv.slice(3)
     migrationName = migrationNameArray.join('_').toLowerCase()
   }
   createMigration(migrationName)
     .catch(console.error)
+} else if (command === 'migrate') {
+  migrate()
+    .catch(console.error)
+} else {
+  console.error(chalk.red('Invalid command'))
+  process.exit(1)
 }
