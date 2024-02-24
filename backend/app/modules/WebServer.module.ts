@@ -1,4 +1,4 @@
-import express, { Express } from 'express'
+import express, { Express, Request, Response, NextFunction } from 'express'
 import http from 'http'
 import cors from 'cors'
 import { Configuration } from '@/config'
@@ -7,14 +7,18 @@ import LogRequestsMiddleware from '../middlewares/LogRequests.middleware'
 import { Loggers } from '../initializers/create_loggers'
 
 class WebServer {
-  public static app: Express
-  public static port: number
-  public static isRunning: boolean
-  public static ioServer: http.Server | null
-  public static middlewares: any[]
+  private readonly app: Express
+  private readonly port: number
+  private ioServer: http.Server | null
+  private isRunning: boolean
+  private readonly middlewares: any[]
 
-  private constructor () {
-    throw new Error('This class cannot be instantiated. Use createWebServer() method instead.')
+  private constructor (app: Express, port: number) {
+    this.app = app
+    this.port = port
+    this.ioServer = null
+    this.isRunning = false
+    this.middlewares = []
   }
 
   public static async createWebServer ({
@@ -25,20 +29,39 @@ class WebServer {
     applicationUrl: string
     port?: number
     corsOrigins?: string[]
-  }): Promise<Express> {
-    this.app = express()
-    this.port = port
-    this.isRunning = false
-    this.ioServer = null
-    this.app.set('applicationUrl', applicationUrl)
-    this.middlewares = []
-    this.applyMiddlewares([
+  }): Promise<WebServer> {
+    const app = express()
+    const webServer = new WebServer(app, port)
+
+    app.set('applicationUrl', applicationUrl)
+
+    webServer.applyMiddlewares([
       express.json(),
       express.urlencoded({ extended: true }),
-      LogRequestsMiddleware,
-      FormatApiResponseMiddleware
+      LogRequestsMiddleware
     ])
 
+    webServer.setupCORS(applicationUrl, corsOrigins)
+
+    app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+      res.status(500).json({
+        error: err.message
+      })
+    })
+
+    app.all('*', (req: Request, res: Response) => {
+      res.status(404).json({
+        errors: ['Apparently the requested URL or Resource could not be found.'],
+        error_type: 'not_found'
+      })
+    })
+
+    app.use(FormatApiResponseMiddleware)
+
+    return webServer
+  }
+
+  private setupCORS (applicationUrl: string, corsOrigins: string[]): void {
     if (Configuration.ENABLE_CORS) {
       this.applyMiddlewares([
         cors({
@@ -49,18 +72,19 @@ class WebServer {
     } else {
       Loggers.WebServer.writeLog('ENABLE_CORS is set to false on environment variables. Skipping CORS middleware...')
     }
-    return this.app
   }
 
-  public static async start () {
+  public async start (): Promise<void> {
     if (!this.isRunning) {
       Loggers.WebServer.writeLog('Starting server...')
+
       if (!this.app) {
         Loggers.WebServer.writeLog('Server not initialized. Did you forget to call createWebServer() method?')
         throw new Error('Server not initialized. Did you forget to call createWebServer() method?')
       }
 
       this.ioServer = http.createServer(this.app)
+
       await new Promise<void>((resolve) => {
         if (!this.ioServer) {
           throw new Error('Server not initialized. Did you forget to call createWebServer() method?')
@@ -77,7 +101,7 @@ class WebServer {
     }
   }
 
-  public static applyMiddlewares (middlewares: any[]) {
+  private applyMiddlewares (middlewares: any[]): void {
     middlewares.forEach((middleware) => {
       this.app.use(middleware)
       this.middlewares.push(middleware)
