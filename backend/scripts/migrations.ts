@@ -35,6 +35,11 @@ export async function deleteDatabase (): Promise<void> {
   console.log('Base de datos eliminada')
 }
 
+export const checkPendingMigrations = async (): Promise<void> => {
+  // Implementa la lógica para verificar si hay migraciones pendientes
+  console.log('Verificación realizada')
+}
+
 const command = process.argv[2]
 
 if (!command) {

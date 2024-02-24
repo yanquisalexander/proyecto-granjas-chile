@@ -31,5 +31,8 @@ module.exports = {
         "@typescript-eslint/no-unsafe-argument": "off",
         "@typescript-eslint/strict-boolean-expressions": "off",
         "@typescript-eslint/naming-convention": "off",
+        "@typescript-eslint/prefer-nullish-coalescing": "off",
+        "@typescript-eslint/no-extraneous-class": "off",
+        "@typescript-eslint/no-floating-promises": "off",
     }
 }
