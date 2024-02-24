@@ -42,7 +42,7 @@ class WebServer {
     if (Configuration.ENABLE_CORS) {
       this.applyMiddlewares([
         cors({
-          origin: corsOrigins,
+          origin: [applicationUrl, ...corsOrigins],
           optionsSuccessStatus: 200
         })
       ])
