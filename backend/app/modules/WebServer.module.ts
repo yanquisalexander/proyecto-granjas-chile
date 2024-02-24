@@ -79,8 +79,9 @@ class WebServer {
       Loggers.WebServer.writeLog('Starting server...')
 
       if (!this.app) {
-        Loggers.WebServer.writeLog('Server not initialized. Did you forget to call createWebServer() method?')
-        throw new Error('Server not initialized. Did you forget to call createWebServer() method?')
+        const message = 'Server not initialized. Did you forget to call createWebServer() method?'
+        Loggers.WebServer.writeLog(message)
+        throw new Error(message)
       }
 
       this.ioServer = http.createServer(this.app)
