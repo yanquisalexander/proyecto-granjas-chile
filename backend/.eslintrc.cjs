@@ -34,5 +34,7 @@ module.exports = {
         "@typescript-eslint/prefer-nullish-coalescing": "off",
         "@typescript-eslint/no-extraneous-class": "off",
         "@typescript-eslint/no-floating-promises": "off",
+        "@typescript-eslint/explicit-function-return-type": "off",
+        "@typescript-eslint/consistent-type-imports": "off",
     }
 }
