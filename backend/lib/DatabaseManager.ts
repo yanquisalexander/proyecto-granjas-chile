@@ -2,7 +2,7 @@ import pg, { QueryResult } from 'pg'
 import 'dotenv/config'
 import chalk from 'chalk'
 import { Configuration } from '@/config'
-import { Loggers } from '@/app/initializers/create_loggers'
+import { Loggers } from '@/app/services/loggers'
 
 const { Pool } = pg
 
