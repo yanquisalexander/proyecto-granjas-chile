@@ -7,8 +7,9 @@ const __dirname = path.resolve()
 class Logger {
   private readonly logFilePath: string
 
-  constructor (logFileName?: string) {
+  constructor (logFileName: string = 'log') {
     const logsDirectory = path.join(__dirname, 'logs')
+    logFileName = logFileName.toLowerCase()
 
     if (!fs.existsSync(logsDirectory)) {
       fs.mkdirSync(logsDirectory)
