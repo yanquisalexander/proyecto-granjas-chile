@@ -22,11 +22,11 @@ export async function createMigration (name: string): Promise<void> {
 import Database from '@/lib/DatabaseManager'
 
 class ${toPascalCase(name)} extends Migration {
-  async up (): Promise<void> {
+  static async up (): Promise<void> {
     // Write your migration logic here
   }
 
-  async down (): Promise<void> {
+  static async down (): Promise<void> {
     // Write the logic to revert the migration here
   }
 }
@@ -47,11 +47,13 @@ export async function rollbackMigration (): Promise<void> {
 
 export async function migrate (): Promise<void> {
   console.log('Migrating database...')
+
   try {
     await Database.connect()
     console.log('Database connected')
   } catch (error) {
     console.error(chalk.red('[MIGRATIONS]'), 'Error connecting to the database')
+    process.exit(1)
   }
 
   const migrationsDirectory = path.join(__dirname, 'db/migrations')
@@ -62,34 +64,43 @@ export async function migrate (): Promise<void> {
     ? fs.readFileSync(migrationHistoryPath, 'utf-8').split('\n').filter(Boolean)
     : []
 
-  const pendingMigrations = migrationFiles.filter((migration) => !appliedMigrations.includes(migration))
+  const pendingMigrations = migrationFiles
+    .filter((migration) => !appliedMigrations.includes(migration))
+    .sort()
 
   console.log(chalk.grey('[MIGRATIONS]'), `Trying to apply ${pendingMigrations.length} migration(s)`)
+
+  const successfulMigrations: string[] = []
+
   for (const migrationFile of pendingMigrations) {
     let migrationPath = path.join(migrationsDirectory, migrationFile)
-    if (os.platform() === 'win32') {
-      /*
-       * On Windows, the path to the migration file must be resolved
-        * using the file:// protocol to avoid the following error:
-        * Error [ERR_UNSUPPORTED_ESM_URL_SCHEME]: Only URLs with a scheme in: file, data, and node are supported
-       */
 
+    if (os.platform() === 'win32') {
       migrationPath = `file://${migrationPath}`
     }
+
     const migrationModule = (await import(migrationPath)).default as typeof Migration
     console.log(chalk.grey('[MIGRATIONS]'), `Applying migration ${migrationFile}`)
 
     try {
       await migrationModule.up()
+      successfulMigrations.push(migrationFile)
       fs.appendFileSync(migrationHistoryPath, `${migrationFile}\n`)
       console.log(chalk.grey('[MIGRATIONS]'), `Migration ${migrationFile} applied successfully`)
     } catch (error) {
       console.error(chalk.red('[MIGRATIONS]'), `Error applying migration ${migrationFile}:`, error)
       console.log(chalk.grey('[MIGRATIONS]'), 'Rolling back applied migrations...')
-      for (const appliedMigration of appliedMigrations) {
-        const appliedMigrationPath = path.join(migrationsDirectory, appliedMigration)
-        const appliedMigrationModule = await import(appliedMigrationPath).then((module) => module.default as typeof Migration)
+
+      for (const appliedMigration of successfulMigrations) {
+        let appliedMigrationPath = path.join(migrationsDirectory, appliedMigration)
+
+        if (os.platform() === 'win32') {
+          appliedMigrationPath = `file://${appliedMigrationPath}`
+        }
+
+        const appliedMigrationModule = (await import(appliedMigrationPath)).default as typeof Migration
         console.log(chalk.grey('[MIGRATIONS]'), `Rolling back migration ${appliedMigration}`)
+
         try {
           await appliedMigrationModule.down()
           console.log(chalk.grey('[MIGRATIONS]'), `Migration ${appliedMigration} rolled back successfully`)
@@ -97,6 +108,7 @@ export async function migrate (): Promise<void> {
           console.error(chalk.red('[MIGRATIONS]'), `Error rolling back migration ${appliedMigration}:`, error)
         }
       }
+
       process.exit(1)
     }
   }
@@ -117,6 +129,13 @@ export async function deleteDatabase (): Promise<void> {
     console.log('Database connected')
     // Delete the content, due to the fact that the database cannot be deleted while being connected
     await Database.query('DROP SCHEMA public CASCADE; CREATE SCHEMA public;')
+    // Delete the migration history file
+    const migrationHistoryPath = path.join(__dirname, 'db', '.migration_history')
+    if (fs.existsSync(migrationHistoryPath)) {
+      fs.unlinkSync(migrationHistoryPath)
+    }
+
+    console.log('Database content deleted')
   } catch (error) {
     console.error(chalk.red('[MIGRATIONS]'), 'Error deleting the database content:', error)
     process.exit(1)

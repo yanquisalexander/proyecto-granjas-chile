@@ -36,5 +36,6 @@ module.exports = {
         "@typescript-eslint/no-floating-promises": "off",
         "@typescript-eslint/explicit-function-return-type": "off",
         "@typescript-eslint/consistent-type-imports": "off",
+        "@typescript-eslint/no-misused-promises": "off",
     }
 }
