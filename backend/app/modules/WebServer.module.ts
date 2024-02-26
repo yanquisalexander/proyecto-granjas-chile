@@ -1,10 +1,10 @@
-import express, { Express, Request, Response, NextFunction } from 'express'
+import express, { Express, Request, Response, NextFunction, RequestHandler, Router } from 'express'
 import http from 'http'
 import cors from 'cors'
 import { Configuration } from '@/config'
 import FormatApiResponseMiddleware from '../middlewares/FormatApiResponse.middleware'
 import LogRequestsMiddleware from '../middlewares/LogRequests.middleware'
-import { Loggers } from '../initializers/create_loggers'
+import { Loggers } from '../services/loggers'
 
 class WebServer {
   private readonly app: Express
@@ -102,11 +102,56 @@ class WebServer {
     }
   }
 
+  public async stop (): Promise<void> {
+    if (this.isRunning) {
+      Loggers.WebServer.writeLog('Stopping server...')
+
+      if (!this.ioServer) {
+        throw new Error('Server not initialized. Did you forget to call createWebServer() method?')
+      }
+
+      await new Promise<void>((resolve) => {
+        this.ioServer?.close(() => {
+          Loggers.WebServer.writeLog('Server stopped')
+          resolve()
+        })
+      })
+
+      this.isRunning = false
+    }
+  }
+
   private applyMiddlewares (middlewares: any[]): void {
     middlewares.forEach((middleware) => {
       this.app.use(middleware)
       this.middlewares.push(middleware)
     })
+  }
+
+  public addRoute (method: 'get' | 'post' | 'put' | 'delete', path: string, handler: RequestHandler): void {
+    if (!this.app) {
+      throw new Error('Server not initialized. Did you forget to call createWebServer() method?')
+    }
+
+    Loggers.WebServer.writeLog(`Adding route ${method.toUpperCase()} ${path}`)
+
+    const router = Router()
+    router[method](path, handler)
+
+    /*
+      This method adds the route after the LogRequestsMiddleware
+      to avoid conflicts with catch-all routes and 404 responses.
+    */
+
+    const logRequestsIndex = this.app._router.stack.findIndex(
+      (middleware: any) => middleware.handle === LogRequestsMiddleware
+    )
+
+    if (logRequestsIndex !== -1) {
+      this.app._router.stack.splice(logRequestsIndex + 1, 0, ...router.stack)
+    } else {
+      this.app.use(router)
+    }
   }
 }
 

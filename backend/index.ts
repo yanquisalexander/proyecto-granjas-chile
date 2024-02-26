@@ -1,18 +1,20 @@
-import WebServer from './app/modules/WebServer.module'
 import { initializeSiteSettings } from './app/services/siteSettings'
-import { Configuration } from './config'
+import { createWebServer, getWebServerInstance, startWebServer } from './app/services/webServer'
 import Database from './lib/DatabaseManager'
 
 const bootApplication = async (): Promise<void> => {
   console.log('Booting application...')
   await Database.connect()
-  const web = await WebServer.createWebServer({
-    applicationUrl: Configuration.APPLICATION_URL,
-    corsOrigins: Configuration.CORS_ALLOWED_ORIGINS
-  })
-  await web.start()
+  await createWebServer()
+
+  await startWebServer()
+
   await initializeSiteSettings()
   console.log('Application booted')
+
+  getWebServerInstance()?.addRoute('get', '/test', async (req, res) => {
+    return res.send('Hello, world!')
+  })
 }
 
 bootApplication()
