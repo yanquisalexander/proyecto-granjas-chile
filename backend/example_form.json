@@ -1,0 +1,222 @@
+{
+    "form_name": "Example form",
+    "form_description": "This is an example form",
+    "custom_css": null,
+    "steps": [
+        {
+            "title": "Step 1",
+            "description": "This is the first step",
+            "fields": [
+                /*
+                    Aqui se definen los campos que tendrá este paso del formulario
+                    Cada campo tiene un nombre, un tipo y opciones
+
+                    Las opciones de cada campo dependen del tipo de campo
+
+                    En options_template se definen las opciones que puede tener cada tipo de campo
+                */
+                {
+                    "title": "Short text",
+                    "type": "short_text",
+                    "options": {
+                        "maxLength": 100,
+                        "minLength": 1
+                    }
+                },
+                {
+                    "title": "Long text",
+                    "type": "long_text",
+                    "options": {
+                        "maxLength": 1000,
+                        "minLength": 1
+                    }
+                },
+                {
+                    "title": "Single choice",
+                    "type": "single_choice",
+                    "options": {
+                        "choices": [
+                            "choice1",
+                            "choice2",
+                            "choice3"
+                        ]
+                    }
+                },
+                {
+                    "title": "Multiple choice",
+                    "type": "multiple_choice",
+                    "options": {
+                        "choices": [
+                            "choice1",
+                            "choice2",
+                            "choice3"
+                        ]
+                    }
+                },
+                {
+                    "title": "Dropdown",
+                    "type": "dropdown",
+                    "options": {
+                        "choices": [
+                            "choice1",
+                            "choice2",
+                            "choice3"
+                        ]
+                    }
+                },
+                {
+                    "title": "Image",
+                    "type": "image",
+                    "options": {
+                        "maxImages": 1
+                    }
+                },
+                {
+                    "title": "File upload",
+                    "type": "file_upload",
+                    "options": {
+                        "maxFiles": 1
+                    }
+                },
+                {
+                    "title": "Array",
+                    "type": "array",
+                    "options": {
+                        "columns": [
+                            {
+                                "name": "column1",
+                                "type": "text",
+                                "options": {
+                                    "maxLength": 100,
+                                    "minLength": 1
+                                }
+                            },
+                            {
+                                "name": "column2",
+                                "type": "text",
+                                "options": {
+                                    "maxLength": 100,
+                                    "minLength": 1
+                                }
+                            }
+                        ]
+                    }
+                },
+                {
+                    "title": "Scale",
+                    "type": "scale",
+                    "options": {
+                        "min": 1,
+                        "max": 5
+                    }
+                },
+                {
+                    "title": "Rating",
+                    "type": "rating",
+                    "options": {
+                        "min": 1,
+                        "max": 5
+                    }
+                },
+                {
+                    "title": "Date",
+                    "type": "date",
+                    "options": {
+                        "format": "YYYY-MM-DD"
+                    }
+                },
+                {
+                    "title": "Time",
+                    "type": "time",
+                    "options": {
+                        "format": "HH:mm"
+                    }
+                }
+            ]
+        }
+    ]
+    /*
+        // Short text
+        {
+            "maxLength": 100,
+            "minLength": 1
+        },
+        // Long text
+        {
+            "maxLength": 1000,
+            "minLength": 1
+        },
+        // Single choice
+        {
+            "choices": [
+                "choice1",
+                "choice2",
+                "choice3"
+            ]
+        },
+        // Multiple choice
+        {
+            "choices": [
+                "choice1",
+                "choice2",
+                "choice3"
+            ]
+        },
+        // Dropdown
+        {
+            "choices": [
+                "choice1",
+                "choice2",
+                "choice3"
+            ]
+        },
+        // Image 
+        {
+            "maxImages": 1
+        },
+        // File upload
+        {
+            "maxFiles": 1
+        },
+        // Array (Aquí definimos las columnas que tendrá el array)
+        {
+            "columns": [
+                {
+                    "name": "column1",
+                    "type": "text",
+                    "options": {
+                        "maxLength": 100,
+                        "minLength": 1
+                    }
+                },
+                {
+                    "name": "column2",
+                    "type": "text",
+                    "options": {
+                        "maxLength": 100,
+                        "minLength": 1
+                    }
+                }
+            ]
+        },
+        // Scale
+        {
+            "min": 1,
+            "max": 5
+        },
+        // Rating
+        {
+            "min": 1,
+            "max": 5
+        },
+        // Date
+        {
+            "format": "YYYY-MM-DD"
+        },
+        // Time
+        {
+            "format": "HH:mm"
+        }
+    ]
+    */
+}
