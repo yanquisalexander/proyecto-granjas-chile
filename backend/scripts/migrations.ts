@@ -1,24 +1,43 @@
+import Migration from '@/db/Migration'
 import Database from '@/lib/DatabaseManager'
 import chalk from 'chalk'
 import fs from 'node:fs'
 import path from 'node:path'
+import os from 'node:os'
+import * as readlineSync from 'readline-sync'
 
 const __dirname = path.resolve()
 
 const timestamp = new Date().toISOString().replace(/[-T:]/g, '').split('.')[0]
 
+const toPascalCase = (str: string): string => {
+  return str.split('_').map((word) => word.charAt(0).toUpperCase() + word.slice(1)).join('')
+}
+
 export async function createMigration (name: string): Promise<void> {
-  const migrationFileName = `${timestamp}_${name}.sql`
+  const migrationFileName = `${timestamp}_${name}.ts`
   const migrationPath = path.join(__dirname, 'db/migrations', migrationFileName)
 
-  fs.writeFileSync(migrationPath, `--- Migration generated at: ${timestamp}
---- Name: ${name}
+  const migrationContent = `import Migration from '@/db/Migration'
+import Database from '@/lib/DatabaseManager'
 
---- Write your migration below this line
-  `)
+class ${toPascalCase(name)} extends Migration {
+  async up (): Promise<void> {
+    // Write your migration logic here
+  }
 
-  console.log(`Migration created at: ${migrationPath}`)
-  console.log('Remember to run db:migrate to apply the migration after writing it')
+  async down (): Promise<void> {
+    // Write the logic to revert the migration here
+  }
+}
+
+export default ${toPascalCase(name)}
+`
+
+  fs.writeFileSync(migrationPath, migrationContent, 'utf-8')
+
+  console.log(`Migration file created at: ${migrationPath}`)
+  console.log('Remember to implement the "up" and "down" methods in the generated file.')
 }
 
 export async function rollbackMigration (): Promise<void> {
@@ -38,7 +57,7 @@ export async function migrate (): Promise<void> {
   const migrationsDirectory = path.join(__dirname, 'db/migrations')
   const migrationHistoryPath = path.join(__dirname, 'db', '.migration_history')
 
-  const migrationFiles = fs.readdirSync(migrationsDirectory).filter((file) => file.endsWith('.sql'))
+  const migrationFiles = fs.readdirSync(migrationsDirectory).filter((file) => file.endsWith('.ts'))
   const appliedMigrations = fs.existsSync(migrationHistoryPath)
     ? fs.readFileSync(migrationHistoryPath, 'utf-8').split('\n').filter(Boolean)
     : []
@@ -47,21 +66,38 @@ export async function migrate (): Promise<void> {
 
   console.log(chalk.grey('[MIGRATIONS]'), `Trying to apply ${pendingMigrations.length} migration(s)`)
   for (const migrationFile of pendingMigrations) {
-    const migrationPath = path.join(migrationsDirectory, migrationFile)
-    const migrationContent = fs.readFileSync(migrationPath, 'utf-8')
+    let migrationPath = path.join(migrationsDirectory, migrationFile)
+    if (os.platform() === 'win32') {
+      /*
+       * On Windows, the path to the migration file must be resolved
+        * using the file:// protocol to avoid the following error:
+        * Error [ERR_UNSUPPORTED_ESM_URL_SCHEME]: Only URLs with a scheme in: file, data, and node are supported
+       */
+
+      migrationPath = `file://${migrationPath}`
+    }
+    const migrationModule = (await import(migrationPath)).default as typeof Migration
     console.log(chalk.grey('[MIGRATIONS]'), `Applying migration ${migrationFile}`)
-    console.log(chalk.gray(`>>> ${migrationContent}`))
 
     try {
-      await Database.runMigration(migrationContent, migrationFile)
-      console.log(chalk.grey('[MIGRATIONS]'), `Migration ${migrationFile} applied`)
-
-      // Agregar la migración al historial
+      await migrationModule.up()
       fs.appendFileSync(migrationHistoryPath, `${migrationFile}\n`)
+      console.log(chalk.grey('[MIGRATIONS]'), `Migration ${migrationFile} applied successfully`)
     } catch (error) {
-      console.error(chalk.red('[MIGRATIONS]'), `Error applying migration ${migrationFile}`)
-      console.error(chalk.red('[MIGRATIONS]'), error)
-      break
+      console.error(chalk.red('[MIGRATIONS]'), `Error applying migration ${migrationFile}:`, error)
+      console.log(chalk.grey('[MIGRATIONS]'), 'Rolling back applied migrations...')
+      for (const appliedMigration of appliedMigrations) {
+        const appliedMigrationPath = path.join(migrationsDirectory, appliedMigration)
+        const appliedMigrationModule = await import(appliedMigrationPath).then((module) => module.default as typeof Migration)
+        console.log(chalk.grey('[MIGRATIONS]'), `Rolling back migration ${appliedMigration}`)
+        try {
+          await appliedMigrationModule.down()
+          console.log(chalk.grey('[MIGRATIONS]'), `Migration ${appliedMigration} rolled back successfully`)
+        } catch (error) {
+          console.error(chalk.red('[MIGRATIONS]'), `Error rolling back migration ${appliedMigration}:`, error)
+        }
+      }
+      process.exit(1)
     }
   }
 
@@ -70,8 +106,24 @@ export async function migrate (): Promise<void> {
 }
 
 export async function deleteDatabase (): Promise<void> {
-  // Implementa la lógica para eliminar la base de datos
-  console.log('Base de datos eliminada')
+  const confirm = readlineSync.question('Are you sure you want to delete the database content? This action cannot be undone. (yes/no): ')
+  if (confirm !== 'yes') {
+    console.log('Database deletion cancelled')
+    process.exit(0)
+  }
+
+  try {
+    await Database.connect()
+    console.log('Database connected')
+    // Delete the content, due to the fact that the database cannot be deleted while being connected
+    await Database.query('DROP SCHEMA public CASCADE; CREATE SCHEMA public;')
+  } catch (error) {
+    console.error(chalk.red('[MIGRATIONS]'), 'Error deleting the database content:', error)
+    process.exit(1)
+  }
+
+  console.log('[MIGRATIONS]', 'Database content deleted successfully')
+  process.exit(0)
 }
 
 export const checkPendingMigrations = async (): Promise<void> => {
@@ -102,6 +154,9 @@ if (command === 'create') {
     .catch(console.error)
 } else if (command === 'migrate') {
   migrate()
+    .catch(console.error)
+} else if (command === 'drop') {
+  deleteDatabase()
     .catch(console.error)
 } else {
   console.error(chalk.red('Invalid command'))
