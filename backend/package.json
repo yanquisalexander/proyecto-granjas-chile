@@ -22,13 +22,13 @@
     "@types/readline-sync": "1.4.8",
     "@typescript-eslint/eslint-plugin": "^6.4.0",
     "eslint": "^8.0.1",
-    "eslint-config-standard-with-typescript": "^43.0.1",
+    "eslint-config-standard-with-typescript": "43.0.1",
     "eslint-plugin-import": "^2.25.2",
     "eslint-plugin-n": "^15.0.0 || ^16.0.0 ",
     "eslint-plugin-promise": "^6.0.0",
     "nodemon": "^3.1.0",
     "tsx": "^4.7.1",
-    "typescript": "^5.3.3"
+    "typescript": "*"
   },
   "dependencies": {
     "chalk": "4",
