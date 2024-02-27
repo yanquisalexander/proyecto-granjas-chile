@@ -1,9 +1,5 @@
 {
-  "include": [
-    ".eslintrc.cjs",
-  ],
   "compilerOptions": {
-    "allowJs": true,
     "target": "ES2016",
     "module": "commonjs",
     "outDir": "./dist",

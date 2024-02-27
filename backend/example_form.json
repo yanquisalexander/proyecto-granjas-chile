@@ -1,27 +1,23 @@
 {
-    "form_id": "example_form",
     "form_name": "Example form",
     "form_description": "This is an example form",
     "custom_css": null,
     "steps": [
         {
-            "step_id": "step1",
             "title": "Step 1",
             "description": "This is the first step",
             "fields": [
                 /*
                     Aqui se definen los campos que tendrá este paso del formulario
-                    Cada campo tiene un nombre, un tipo, si es requerido o no y opciones adicionales
+                    Cada campo tiene un nombre, un tipo y opciones
 
                     Las opciones de cada campo dependen del tipo de campo
 
                     En options_template se definen las opciones que puede tener cada tipo de campo
                 */
                 {
-                    "field_id": "field_1",
                     "title": "Short text",
                     "type": "short_text",
-                    "required": true,
                     "options": {
                         "maxLength": 100,
                         "minLength": 1
@@ -33,11 +29,6 @@
                     "options": {
                         "maxLength": 1000,
                         "minLength": 1
-                    },
-                    "conditions": {
-                        "required_fields_to_show": [
-                            "field_1"
-                        ]
                     }
                 },
                 {
@@ -142,7 +133,7 @@
                     }
                 }
             ]
-        },
+        }
     ]
     /*
         // Short text
@@ -229,72 +220,3 @@
     ]
     */
 }
-// Conditional fields
-/* {
-    "required_fields_to_show" :[
-        "field_1",
-    ],
-} 
-
-*/
-// Form response
-/* 
-{
-    "form_id": "example_form",
-    "responses": [
-        {
-            "step_id": "step1",
-            "fields": [
-                {
-                    "field_id": "field_1",
-                    "value": "value1"
-                },
-                {
-                    "field_id": "field_2",
-                    "value": "value2"
-                },
-                {
-                    "field_id": "field_3",
-                    "value": "value3"
-                },
-                {
-                    "field_id": "field_4",
-                    "value": "value4"
-                },
-                {
-                    "field_id": "field_5",
-                    "value": "value5"
-                },
-                {
-                    "field_id": "field_6",
-                    "value": "value6"
-                },
-                {
-                    "field_id": "field_7",
-                    "value": "value7"
-                },
-                {
-                    "field_id": "field_8",
-                    "value": "value8"
-                },
-                {
-                    "field_id": "field_9",
-                    "value": "value9"
-                },
-                {
-                    "field_id": "field_10",
-                    "value": "value10"
-                },
-                {
-                    "field_id": "field_11",
-                    "value": "value11"
-                },
-                {
-                    "field_id": "field_12",
-                    "value": "value12"
-                }
-            ]
-        }
-    ]
-}
-*/
