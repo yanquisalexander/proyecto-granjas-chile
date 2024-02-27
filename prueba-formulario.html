@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulario de Prueba</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body>
+
+    <main class="bg-gray-200 min-h-screen">
+        <div id="app">
+
+            <div class="p-4 flex items-center justify-center flex-col">
+                <header class="flex items-center flex-col justify-center">
+                    <h1 class="text-xl">
+                        {{form.form_name}}
+                    </h1>
+                    <p v-if="form.form_description">
+                        {{form.form_description}}
+                    </p>
+                </header>
+
+                <div class="p-4 mt-16 w-4/5 md:max-w-2xl bg-white rounded-xl">
+                    <template v-for="step in form.steps" :key="step.title">
+                        <div v-show="form.steps.indexOf(step) === currentStep">
+
+                            <h2 class="text-xl font-bold">
+                                {{step.title}}
+                            </h2>
+                            <p class="text-md font-medium" v-if="step.description">
+                                {{step.description}}
+                            </p>
+                            <div class="p-4">
+                                <div v-for="field in step.fields" :key="field.field_id">
+                                    <div class="my-4">
+                                        <h3 class="text-md my-8 font-medium">
+                                            {{field.title}}
+                                        </h3>
+                                        <div v-if="field.type === 'short_text'">
+                                            <input class="border-2 rounded-md p-0.5 border-solid border-gray-400 w-full"
+                                                type="text" :maxlength="field.options.maxLength"
+                                                :minlength="field.options.minLength"
+                                                v-model="dataToSubmit[field.field_id]">
+                                        </div>
+                                        <div v-if="field.type === 'long_text'">
+                                            <textarea
+                                                class="border-2 rounded-md p-0.5 border-solid border-gray-400 w-full"
+                                                :maxlength="field.options.maxLength"
+                                                :minlength="field.options.minLength"
+                                                v-model="dataToSubmit[field.field_id]"></textarea>
+                                        </div>
+                                        <div v-if="field.type === 'single_choice'">
+                                            <div v-for="choice in field.options.choices" :key="choice">
+                                                <input type="radio" :name="field.title" :value="choice"
+                                                    v-model="dataToSubmit[field.field_id]">
+                                                <label :for="choice">{{choice}}</label>
+                                            </div>
+                                        </div>
+                                        <div v-if="field.type === 'multiple_choice'">
+                                            <div v-for="(choice, index) in field.options.choices" :key="choice">
+                                                <input type="checkbox" :name="field.title" :value="choice"
+                                                    @change="handleCheckboxChange(field.field_id, $event)">
+                                                <label :for="choice">{{choice}}</label>
+                                            </div>
+                                        </div>
+
+                                        <div v-if="field.type === 'dropdown'">
+                                            <select
+                                                class="border-2 rounded-md p-0.5 border-solid border-gray-400 w-full cursor-pointer"
+                                                :name="field.title" v-model="dataToSubmit[field.field_id]">
+                                                <option v-for="choice in field.options.choices" :key="choice"
+                                                    :value="choice">
+                                                    {{choice}}</option>
+                                            </select>
+                                        </div>
+                                        <div v-if="field.type === 'image'">
+                                            <input type="file" :accept="'image/*'"
+                                                :multiple="field.options.maxImages > 1"
+                                                @change="dataToSubmit[field.field_id] = $event.target.files">
+                                        </div>
+                                        <div v-if="field.type === 'file_upload'">
+                                            <input type="file" :multiple="field.options.maxFiles > 1"
+                                                @change="dataToSubmit[field.field_id] = $event.target.files">
+                                        </div>
+
+                                        <div v-if="field.type === 'array'">
+                                            <table>
+                                                <thead>
+                                                    <tr>
+                                                        <th>Fila</th>
+                                                        <th v-for="column in field.options.columns" :key="column.name">
+                                                            {{ column.name }}
+                                                        </th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr v-for="(row, rowIndex) in field.options.rows" :key="row.row_id">
+                                                        <td>{{ row.row_name }}</td>
+
+
+                                                        <td v-for="column in field.options.columns" :key="column.name">
+                                                            <template v-if="column.options.field_type === 'text'">
+                                                                <input type="text" v-model="row[column.column_id]"
+                                                                    :maxlength="column.options.maxLength"
+                                                                    :minlength="column.options.minLength"
+                                                                    @change="handleArrayFieldChange(field.field_id, row.row_id, column.column_id, $event)">
+
+                                                            </template>
+                                                            <template v-if="column.options.field_type === 'number'">
+                                                                <input type="number" v-model="row[column.column_id]"
+                                                                    :max="column.options.max" :min="column.options.min"
+                                                                    @change="handleArrayFieldChange(field.field_id, row.row_id, column.column_id, $event)">
+                                                            </template>
+                                                            <template v-if="column.options.field_type === 'check'">
+                                                                <input type="checkbox" v-model="row[column.column_id]"
+                                                                    :true-value="true" :false-value="false"
+                                                                    @change="handleArrayFieldChange(field.field_id, row.row_id, column.column_id, $event, true)">
+                                                            </template>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+
+                                        <div v-if="field.type === 'scale'">
+                                            <input type="range" :max="field.options.max" :min="field.options.min"
+                                                v-model="dataToSubmit[field.field_id]">
+                                        </div>
+
+                                        <div v-if="field.type === 'rating'">
+                                            <input type="range" :max="field.options.max" :min="field.options.min"
+                                                v-model="dataToSubmit[field.field_id]">
+                                        </div>
+
+                                        <div v-if="field.type === 'date'">
+                                            <input type="date" :format="field.options.format"
+                                                v-model="dataToSubmit[field.field_id]">
+                                        </div>
+
+                                        <div v-if="field.type === 'time'">
+                                            <input type="time" :format="field.options.format"
+                                                v-model="dataToSubmit[field.field_id]">
+                                        </div>
+
+                                    </div>
+
+
+
+
+                                </div>
+                    </template>
+                </div>
+            </div>
+
+            <div class="fixed z-10 left-2 top-4 bg-white p-4">
+                <details>
+                    <summary>Datos a enviar</summary>
+                    <pre>{{ dataToSubmit }}</pre>
+                </details>
+            </div>
+
+            <div class="flex justify-between mt-4 mx-auto" style="width: 60%;">
+                <button class="bg-blue-500 text-white px-4 py-2 rounded-md" @click="currentStep--"
+                    :disabled="currentStep === 0">Anterior</button>
+                <button class="bg-blue-500 text-white px-4 py-2 rounded-md" @click="currentStep++"
+                    :disabled="currentStep === form.steps.length - 1">Siguiente</button>
+
+            </div>
+
+            <!-- Fixed sidebar with steps -->
+
+            <div class="fixed z-10 left-0 bottom-0 h-[200px] bg-white w-[250px] shadow-md p-4">
+                <h2 class="text-xl font-bold">Pasos</h2>
+                <ul>
+                    <li v-for="(step, index) in form.steps" :key="step.title">
+                        <button :class="{'bg-blue-500 px-4 rounded-md text-white': currentStep === index}"
+                            @click="currentStep = index">
+                            {{ step.title }}
+                        </button>
+                    </li>
+                </ul>
+            </div>
+
+            <div id="form-responses-summary" class="max-w-2xl mx-auto p-4 bg-white my-8"
+                v-if="Object.keys(dataToSubmit).length > 0">
+                <h2 class="text-xl font-bold mb-4">Resumen de respuestas</h2>
+                <ul>
+                    <li v-for="(value, fieldId) in dataToSubmit" :key="fieldId">
+                        <strong>{{ getFieldTitle(fieldId) }}:</strong>
+                        <template v-if="Array.isArray(value)">
+                            <pre>{{ JSON.stringify(value, null, 2) }}</pre>
+                        </template>
+                        <template v-else>
+                            {{ value }}
+                        </template>
+                    </li>
+                </ul>
+            </div>
+
+
+
+        </div>
+
+
+
+
+
+
+
+        </div>
+    </main>
+
+    <script type="module">
+        import { createApp, ref, watch } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js'
+        const form = {
+            "form_id": crypto.randomUUID(),
+            "form_name": "Example form",
+            "form_description": "This is an example form",
+            "custom_css": null,
+            "steps": [
+                {
+                    "step_id": crypto.randomUUID(),
+                    "title": "Step 1",
+                    "description": "This is the first step",
+                    "fields": [
+
+                        {
+                            "field_id": "introduce_tu_nombre",
+                            "title": "Introduce tu nombre",
+                            "type": "short_text",
+                            "options": {
+                                "maxLength": 100,
+                                "minLength": 1
+                            }
+                        },
+                        {
+                            "field_id": crypto.randomUUID(),
+                            "title": "Cuéntanos como te sientes",
+                            "type": "long_text",
+                            "options": {
+                                "maxLength": 1000,
+                                "minLength": 1
+                            }
+                        },
+                        {
+                            "field_id": crypto.randomUUID(),
+                            "title": "Single choice",
+                            "type": "single_choice",
+                            "options": {
+                                "choices": [
+                                    "choice1",
+                                    "choice2",
+                                    "choice3"
+                                ]
+                            }
+                        },
+                        {
+                            "field_id": crypto.randomUUID(),
+                            "title": "Multiple choice",
+                            "type": "multiple_choice",
+                            "options": {
+                                "choices": [
+                                    "choice1",
+                                    "choice2",
+                                    "choice3"
+                                ]
+                            }
+                        },
+                        {
+                            "field_id": crypto.randomUUID(),
+                            "title": "Dropdown",
+                            "type": "dropdown",
+                            "options": {
+                                "choices": [
+                                    "choice1",
+                                    "choice2",
+                                    "choice3"
+                                ]
+                            }
+                        },
+                        {
+                            "field_id": crypto.randomUUID(),
+                            "title": "Image",
+                            "type": "image",
+                            "options": {
+                                "maxImages": 1
+                            }
+                        },
+                        {
+                            "field_id": crypto.randomUUID(),
+                            "title": "File upload",
+                            "type": "file_upload",
+                            "options": {
+                                "maxFiles": 1
+                            }
+                        },
+                        {
+                            "field_id": crypto.randomUUID(),
+                            "title": "Array",
+                            "type": "array",
+                            "options": {
+                                "columns": [
+                                    {
+                                        "column_id": "7305c7f2-6c2f-4b9d-adb2-8b4015a62de3",
+                                        "name": "column1",
+                                        "type": "text",
+                                        "options": {
+                                            "maxLength": 100,
+                                            "minLength": 1,
+                                            "field_type": "text"
+                                        }
+                                    },
+                                    {
+                                        "column_id": "fe0341cb-df7c-4cbd-a085-e4a1a6eccd09",
+                                        "name": "column2",
+                                        "type": "text",
+                                        "options": {
+                                            "maxLength": 100,
+                                            "minLength": 1,
+                                            "field_type": "number"
+                                        }
+                                    },
+                                    {
+                                        "column_id": "e257b764-f6a0-4a25-b7a0-307e15c5435dz",
+                                        "name": "column3",
+                                        "type": "text",
+                                        "options": {
+                                            "maxLength": 100,
+                                            "minLength": 1,
+                                            "field_type": "check"
+                                        }
+                                    }
+                                ],
+                                "rows": [
+                                    {
+                                        "row_id": "row_id_random_1",
+                                        "row_index": 0,
+                                        "row_name": "row_name_1",
+                                        "values": [
+                                            {
+                                                "column_id": "7305c7f2-6c2f-4b9d-adb2-8b4015a62de3",
+                                                "value": "value1"
+                                            },
+                                            {
+                                                "column_id": "fe0341cb-df7c-4cbd-a085-e4a1a6eccd09",
+                                                "value": "value2"
+                                            },
+                                            {
+                                                "column_id": "e257b764-f6a0-4a25-b7a0-307e15c5435dz",
+                                                "value": "value3"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "row_id": "row_id_random_2",
+                                        "row_index": 1,
+                                        "row_name": "row_name_2",
+                                        "values": [
+                                            {
+                                                "column_id": "7305c7f2-6c2f-4b9d-adb2-8b4015a62de3",
+                                                "value": "value4"
+                                            },
+                                            {
+                                                "column_id": "fe0341cb-df7c-4cbd-a085-e4a1a6eccd09",
+                                                "value": "value5"
+                                            },
+                                            {
+                                                "column_id": "e257b764-f6a0-4a25-b7a0-307e15c5435dz",
+                                                "value": "value6"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "row_id": "row_id_random_3",
+                                        "row_index": 2,
+                                        "row_name": "row_name_3",
+                                        "values": [
+                                            {
+                                                "column_id": "7305c7f2-6c2f-4b9d-adb2-8b4015a62de3",
+                                                "value": "value7"
+                                            },
+                                            {
+                                                "column_id": "fe0341cb-df7c-4cbd-a085-e4a1a6eccd09",
+                                                "value": "value8"
+                                            },
+                                            {
+                                                "column_id": "e257b764-f6a0-4a25-b7a0-307e15c5435dz",
+                                                "value": "value9"
+                                            }
+                                        ]
+                                    }
+
+                                ]
+
+                            }
+                        },
+                        {
+                            "field_id": crypto.randomUUID(),
+                            "title": "Scale",
+                            "type": "scale",
+                            "options": {
+                                "min": 1,
+                                "max": 5
+                            }
+                        },
+                        {
+                            "field_id": crypto.randomUUID(),
+                            "title": "Rating",
+                            "type": "rating",
+                            "options": {
+                                "min": 1,
+                                "max": 5
+                            }
+                        },
+                        {
+                            "field_id": crypto.randomUUID(),
+                            "title": "Date",
+                            "type": "date",
+                            "options": {
+                                "format": "YYYY-MM-DD"
+                            }
+                        },
+                        {
+                            "field_id": crypto.randomUUID(),
+                            "title": "Time",
+                            "type": "time",
+                            "options": {
+                                "format": "HH:mm"
+                            }
+                        }
+                    ]
+                }
+                ,
+                {
+                    "step_id": crypto.randomUUID(),
+                    "title": "Step 2",
+                    "description": "This is the second step",
+                    "fields": [
+                        {
+                            "field_id": "introduce_tu_apellido",
+                            "title": "Introduce tu apellido",
+                            "type": "short_text",
+                            "options": {
+                                "maxLength": 100,
+                                "minLength": 1
+                            }
+                        }
+                    ]
+                }]
+        }
+
+        console.log(form)
+
+
+        const app = createApp({
+
+            setup() {
+                const dataToSubmit = ref({})
+                const currentStep = ref(0)
+
+                const loadDataFromLocalStorage = async () => {
+                    const data = localStorage.getItem('dataToSubmit')
+                    if (data) {
+                        dataToSubmit.value = JSON.parse(data)
+                    }
+                }
+
+
+
+                const getFieldTitle = (fieldId) => {
+                    const field = form.steps.flatMap(step => step.fields).find(field => field.field_id === fieldId)
+                    return field?.title
+                }
+
+
+                const handleCheckboxChange = (field_id, e) => {
+                    console.log(field_id, e.target.value, e.target.checked)
+                    // On multiple choice fields, we need to make sure that the dataToSubmit[field_id] is an array
+                    if (!Array.isArray(dataToSubmit.value[field_id])) {
+                        dataToSubmit.value[field_id] = []
+                    }
+
+                    if (e.target.checked) {
+                        dataToSubmit.value[field_id].push(e.target.value)
+                    } else {
+                        dataToSubmit.value[field_id] = dataToSubmit.value[field_id].filter((value) => value !== e.target.value)
+                    }
+
+                    console.log(dataToSubmit.value)
+                }
+
+                const handleArrayFieldChange = (field_id, rowId, columnId, e, isCheckbox = false) => {
+                    // Inicializar el campo de matriz si es necesario
+                    if (!dataToSubmit.value[field_id]) {
+                        dataToSubmit.value[field_id] = [];
+                    }
+
+                    // Buscar la fila actual por su rowId
+                    const currentRow = dataToSubmit.value[field_id].find(row => row.row_id === rowId);
+
+                    // Inicializar la fila si es necesario
+                    if (!currentRow) {
+                        // Crear la nueva fila con el rowId proporcionado
+                        const newRow = {
+                            row_id: rowId,
+                            [columnId]: isCheckbox ? e.target.checked : e.target.value
+                        };
+
+                        // Agregar la nueva fila al array de filas
+                        dataToSubmit.value[field_id].push(newRow);
+                    } else {
+                        // Asignar el valor a la columna específica
+                        currentRow[columnId] = isCheckbox ? e.target.checked : e.target.value;
+                    }
+
+
+
+
+                };
+
+
+
+
+                return {
+                    form,
+                    dataToSubmit,
+                    handleCheckboxChange,
+                    handleArrayFieldChange,
+                    getFieldTitle,
+                    loadDataFromLocalStorage,
+                    currentStep,
+                }
+
+
+
+            },
+            mounted() {
+                this.loadDataFromLocalStorage()
+            },
+            watch: {
+                dataToSubmit: {
+                    handler(newValue) {
+                        console.log(`Data to submit has changed:`, newValue)
+                        // Save to local storage
+                        localStorage.setItem('dataToSubmit', JSON.stringify(newValue))
+                    },
+                    deep: true
+                }
+            }
+
+
+        }).mount('#app')
+    </script>
+
+
+</body>
+
+</html>
