@@ -1,41 +1,39 @@
 module.exports = {
-    parserOptions: {
-        project: [
-            './tsconfig.json',
-            './.eslintrc.cjs'
-        ],
-    },
-    "env": {
-        "es2021": true,
-        "node": true
-    },
-    "extends": "standard-with-typescript",
-    "overrides": [
-        {
-            "env": {
-                "node": true
-            },
-            "files": [
-                ".eslintrc.{js,cjs}"
-            ],
-            "parserOptions": {
-                "sourceType": "script"
-            }
-        }
+  parserOptions: {
+    project: [
+      './tsconfig.json'
     ],
-    "parserOptions": {
-        "ecmaVersion": "latest",
-        "sourceType": "module"
-    },
-    "rules": {
-        "@typescript-eslint/no-unsafe-argument": "off",
-        "@typescript-eslint/strict-boolean-expressions": "off",
-        "@typescript-eslint/naming-convention": "off",
-        "@typescript-eslint/prefer-nullish-coalescing": "off",
-        "@typescript-eslint/no-extraneous-class": "off",
-        "@typescript-eslint/no-floating-promises": "off",
-        "@typescript-eslint/explicit-function-return-type": "off",
-        "@typescript-eslint/consistent-type-imports": "off",
-        "@typescript-eslint/no-misused-promises": "off",
+    ecmaVersion: 'latest',
+    sourceType: 'module'
+  },
+  root: true,
+  env: {
+    es2021: true,
+    node: true
+  },
+  extends: 'standard-with-typescript',
+  overrides: [
+    {
+      env: {
+        node: true
+      },
+      files: [
+        '.eslintrc.{js,cjs}'
+      ],
+      parserOptions: {
+        sourceType: 'script'
+      }
     }
+  ],
+  rules: {
+    '@typescript-eslint/no-unsafe-argument': 'off',
+    '@typescript-eslint/strict-boolean-expressions': 'off',
+    '@typescript-eslint/naming-convention': 'off',
+    '@typescript-eslint/prefer-nullish-coalescing': 'off',
+    '@typescript-eslint/no-extraneous-class': 'off',
+    '@typescript-eslint/no-floating-promises': 'off',
+    '@typescript-eslint/explicit-function-return-type': 'off',
+    '@typescript-eslint/consistent-type-imports': 'off',
+    '@typescript-eslint/no-misused-promises': 'off'
+  }
 }
