@@ -5,6 +5,7 @@ import { Configuration } from '@/config'
 import FormatApiResponseMiddleware from '../middlewares/FormatApiResponse.middleware'
 import LogRequestsMiddleware from '../middlewares/LogRequests.middleware'
 import { Loggers } from '../services/loggers'
+import router from '../config/routes'
 
 class WebServer {
   private readonly app: Express
@@ -42,6 +43,8 @@ class WebServer {
     ])
 
     webServer.setupCORS(applicationUrl, corsOrigins)
+
+    app.use('/', router)
 
     app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
       res.status(500).json({

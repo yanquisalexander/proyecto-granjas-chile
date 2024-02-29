@@ -1,5 +1,5 @@
 import chalk from 'chalk'
-import SiteSettings from '../models/SiteSettings'
+import SiteSettings from '../models/SiteSettings.model'
 
 export let siteSettings: SiteSettings | null = null
 
