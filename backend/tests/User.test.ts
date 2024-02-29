@@ -1,5 +1,5 @@
 import { UserValidationError } from '@/lib/Error'
-import User from '../app/models/User.model'
+import User from '@/app/models/User.model'
 import { describe, expect, test } from 'vitest'
 
 describe('User', () => {
