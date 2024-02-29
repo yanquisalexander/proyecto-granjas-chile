@@ -125,6 +125,11 @@ class User {
     await Role.removeRole(this, role)
   }
 
+  async getPasswordHash (): Promise<string> {
+    const result = await Database.query('SELECT password FROM users WHERE id = $1', [this.id])
+    return result.rows[0].password
+  }
+
   static async findByEmailOrUsername (email: string, username: string): Promise<UserDTO | null> {
     const result = await Database.query('SELECT id, username, email, created_at, updated_at FROM users WHERE email = $1 OR username = $2', [email, username])
     if (result.rows.length === 0) {
