@@ -10,14 +10,14 @@ export enum Roles {
 export interface RoleAttributes {
   id: string
   name: string
-  scopes: string[]
+  scopes?: string[]
   created_at?: Date
 }
 
 class Role {
   id: string
   name: string
-  scopes: string[]
+  scopes?: string[]
   created_at?: Date
 
   constructor ({ id, name, scopes, created_at }: RoleAttributes) {
