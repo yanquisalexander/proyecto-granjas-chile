@@ -35,6 +35,8 @@ export const UserSchema = z.object({
     required_error: 'Username is required'
   }).min(3, {
     message: 'Username must be at least 3 characters long'
+  }).max(64, {
+    message: 'Username must be at most 64 characters long'
   }),
   email: z.string({
     invalid_type_error: 'Email must be a string',
@@ -42,6 +44,9 @@ export const UserSchema = z.object({
   }).email({
     message: 'Invalid email address'
   }),
+  /*
+    TODO: Add password complexity requirements
+  */
   password: z.string({
     invalid_type_error: 'Password must be a string',
     required_error: 'Password is required'
