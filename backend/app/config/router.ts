@@ -1,5 +1,6 @@
 import { Router } from 'express'
 import { createUsersRouter } from './routes/users'
+import { createEnterprisesRouter } from './routes/enterprises'
 
 /*
     This is the main router file. It will be used to define all core routes for the application.
@@ -16,5 +17,7 @@ router.get('/', (req, res) => {
 })
 
 router.use('/users', createUsersRouter())
+
+router.use('/enterprise', createEnterprisesRouter())
 
 export default router
