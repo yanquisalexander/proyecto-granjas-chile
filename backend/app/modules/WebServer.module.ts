@@ -5,7 +5,7 @@ import { Configuration } from '@/config'
 import FormatApiResponseMiddleware from '../middlewares/FormatApiResponse.middleware'
 import LogRequestsMiddleware from '../middlewares/LogRequests.middleware'
 import { Loggers } from '../services/loggers'
-import router from '../config/routes'
+import router from '../config/router'
 
 class WebServer {
   private readonly app: Express
