@@ -3,6 +3,7 @@ import { UserValidationError } from '@/lib/Error'
 import { UUID } from 'crypto'
 import { z } from 'zod'
 import Role, { Roles } from './Role.model'
+import { Constants } from '../consts'
 
 export interface UserAttributes {
   id: UUID
@@ -77,6 +78,10 @@ class User {
 
   async save (): Promise<void> {
     await this.validate()
+
+    if (this.username === Constants.SYSTEM_USERNAME) {
+      throw new UserValidationError("System user can't be modified")
+    }
 
     const user = await User.findByEmailOrUsername(this.email, this.username)
     if (user) {
