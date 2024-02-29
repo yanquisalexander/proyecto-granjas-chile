@@ -12,5 +12,6 @@ export const Configuration = {
   ENABLE_CORS: process.env.ENABLE_CORS === 'true',
   ENABLE_HTTPS: process.env.ENABLE_HTTPS === 'true',
   CORS_ALLOWED_ORIGINS: process.env.CORS_ALLOWED_ORIGINS?.split(',').map((origin) => origin.trim()) || [],
-  MAX_LOGS_TO_KEEP: parseInt(process.env.MAX_LOGS_TO_KEEP || '10')
+  MAX_LOGS_TO_KEEP: parseInt(process.env.MAX_LOGS_TO_KEEP || '10'),
+  JWT_SECRET: process.env.JWT_SECRET || 'secret'
 }
