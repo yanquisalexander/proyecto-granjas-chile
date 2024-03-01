@@ -3,10 +3,10 @@ import { Router } from 'express'
 
 export const createEnterprisesRouter = (): Router => {
   const router = Router()
-  const controller = new EnterprisesController()
+  const enterprisesController = new EnterprisesController()
 
-  router.get('/', controller.getEnterprises)
-  router.post('/', controller.createEnterprise)
+  router.get('/', enterprisesController.getEnterprises)
+  router.post('/', enterprisesController.createEnterprise)
 
   return router
 }
