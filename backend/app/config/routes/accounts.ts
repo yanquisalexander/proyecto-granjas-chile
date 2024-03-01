@@ -1,5 +1,6 @@
 import { AccountsController } from '@/app/controllers/Accounts.controller'
 import { Configuration } from '@/config'
+import { Authenticator } from '@/lib/Authenticator'
 import { Router } from 'express'
 
 export const createAccountsRouter = (): Router => {
@@ -7,7 +8,7 @@ export const createAccountsRouter = (): Router => {
   const accountsController = new AccountsController()
 
   router.post('/login', accountsController.login)
-  router.get('/current_user', accountsController.getCurrentUser)
+  router.get('/current_user', Authenticator.middleware, accountsController.getCurrentUser)
 
   if (!Configuration.IS_PRODUCTION) {
     /*
