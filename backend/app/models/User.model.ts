@@ -117,6 +117,10 @@ class User {
     return await Role.hasRole(this, role)
   }
 
+  async getRoles (): Promise<Role[]> {
+    return await Role.getRoles(this)
+  }
+
   async isAdmin (): Promise<boolean> {
     return await this.hasRole([Roles.ADMIN])
   }
