@@ -3,6 +3,7 @@ import { createUsersRouter } from './routes/users'
 import { createEnterprisesRouter } from './routes/enterprises'
 import { Authenticator } from '@/lib/Authenticator'
 import { createAccountsRouter } from './routes/accounts'
+import { createFormsRouter } from './routes/forms'
 
 /*
     This is the main router file. It will be used to define all core routes for the application.
@@ -23,5 +24,7 @@ router.use('/users', Authenticator.middleware, createUsersRouter())
 router.use('/accounts', createAccountsRouter())
 
 router.use('/enterprise', createEnterprisesRouter())
+
+router.use('/forms', createFormsRouter())
 
 export default router

@@ -42,7 +42,8 @@ class FormStep {
 
   static async findByFormId (formId: UUID): Promise<FormStep[]> {
     const formSteps = await Database.query('SELECT * FROM form_steps WHERE form_id = $1', [formId])
-    return formSteps.rows
+    const steps = formSteps.rows.map(step => new FormStep(step))
+    return steps
   }
 
   async create (): Promise<void> {
