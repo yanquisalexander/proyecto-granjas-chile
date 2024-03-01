@@ -29,7 +29,10 @@ export interface UserFilter {
 }
 
 export const UserSchema = z.object({
-  id: z.string(),
+  id: z.string({
+    invalid_type_error: 'ID must be a string',
+    required_error: 'ID is required'
+  }),
   username: z.string({
     invalid_type_error: 'Username must be a string',
     required_error: 'Username is required'
@@ -160,8 +163,8 @@ class User {
     return result.rows
   }
 
-  static async findByEmail (email: string): Promise<UserDTO | null> {
-    const result = await Database.query('SELECT id, username, email, created_at, updated_at FROM users WHERE email = $1', [email])
+  static async findByEmail (email: string): Promise<User | null> {
+    const result = await Database.query('SELECT * FROM users WHERE email = $1', [email])
     if (result.rows.length === 0) {
       return null
     }
@@ -179,6 +182,10 @@ class User {
   static async search (filter: UserFilter): Promise<UserDTO[]> {
     const result = await Database.query('SELECT id, username, email, created_at, updated_at FROM users WHERE username LIKE $1 OR email LIKE $2', [`%${filter.username}%`, `%${filter.email}%`])
     return result.rows
+  }
+
+  static generateId (): UUID {
+    return crypto.randomUUID()
   }
 }
 

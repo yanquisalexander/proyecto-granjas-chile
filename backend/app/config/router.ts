@@ -1,6 +1,8 @@
 import { Router } from 'express'
 import { createUsersRouter } from './routes/users'
 import { createEnterprisesRouter } from './routes/enterprises'
+import { Authenticator } from '@/lib/Authenticator'
+import { createAccountsRouter } from './routes/accounts'
 
 /*
     This is the main router file. It will be used to define all core routes for the application.
@@ -16,7 +18,9 @@ router.get('/', (req, res) => {
   res.json({ message: 'Hello, world!' })
 })
 
-router.use('/users', createUsersRouter())
+router.use('/users', Authenticator.middleware, createUsersRouter())
+
+router.use('/accounts', createAccountsRouter())
 
 router.use('/enterprise', createEnterprisesRouter())
 
