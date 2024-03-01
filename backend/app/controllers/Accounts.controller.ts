@@ -4,7 +4,6 @@ import jwt from 'jsonwebtoken'
 import { Configuration } from '@/config'
 import User from '@/app/models/User.model'
 import { UserValidationError } from '@/lib/Error'
-import { Roles } from '../models/Role.model'
 
 export class AccountsController {
   async login (req: Request, res: Response): Promise<void> {
@@ -29,7 +28,6 @@ export class AccountsController {
   async getCurrentUser (req: Request, res: Response): Promise<void> {
     // @ts-expect-error Property 'user' does not exist on type 'Request'
     const user = await User.find((req.user.id))
-    await user?.addRole(Roles.SUPER_ADMIN)
 
     if (!user) {
       res.status(401).json({ message: 'Unauthorized' })

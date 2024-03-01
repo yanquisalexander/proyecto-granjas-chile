@@ -45,6 +45,11 @@ class WorkGroup {
     return new WorkGroup(workGroup.rows[0])
   }
 
+  static async findByUserId (user: User): Promise<WorkGroup[]> {
+    const workGroups = await Database.query('SELECT * FROM work_groups WHERE id IN (SELECT work_group_id FROM work_group_users WHERE user_id = $1)', [user.id])
+    return workGroups.rows
+  }
+
   async create (): Promise<void> {
     await Database.query('INSERT INTO work_groups (id, name, description, enterprise_id) VALUES ($1, $2, $3, $4)', [this.id, this.name, this.description, this.enterprise.id])
   }

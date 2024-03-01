@@ -4,6 +4,7 @@ import { UUID } from 'crypto'
 import { z } from 'zod'
 import Role, { Roles } from './Role.model'
 import { Constants } from '../consts'
+import WorkGroup from './WorkGroup.model'
 
 export interface UserAttributes {
   id: UUID
@@ -13,6 +14,7 @@ export interface UserAttributes {
   created_at?: Date
   updated_at?: Date
   roles?: Role[]
+  workgroups?: WorkGroup[]
 }
 
 export interface UserDTO {
@@ -67,6 +69,7 @@ class User {
   password: string
   created_at?: Date
   updated_at?: Date
+  workgroups?: WorkGroup[]
 
   constructor (attributes: UserAttributes) {
     this.id = attributes.id
@@ -75,6 +78,7 @@ class User {
     this.password = attributes.password
     this.created_at = attributes.created_at
     this.updated_at = attributes.updated_at
+    this.workgroups = attributes.workgroups
   }
 
   async validate (): Promise<void> {
@@ -152,6 +156,10 @@ class User {
 
   async update (): Promise<void> {
     await Database.query('UPDATE users SET username = $1, email = $2, password = $3 WHERE id = $4', [this.username, this.email, this.password, this.id])
+  }
+
+  async getWorkGroups (): Promise<WorkGroup[]> {
+    return await WorkGroup.findByUserId(this)
   }
 
   static async find (id: UUID): Promise<User | null> {
