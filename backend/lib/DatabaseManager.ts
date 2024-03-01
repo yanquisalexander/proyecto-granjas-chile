@@ -21,11 +21,7 @@ class Database {
         port: Configuration.DATABASE_PORT,
         user: Configuration.DATABASE_USER,
         password: Configuration.DATABASE_PASS,
-        connectionTimeoutMillis: 5000,
-        log: (msg) => {
-          Loggers.Database.writeLog(msg)
-          console.log(chalk.green('[DATABASE MANAGER]'), chalk.yellow(msg))
-        }
+        connectionTimeoutMillis: 5000
       })
 
       Database.pool.on('error', (err: any) => {
