@@ -19,15 +19,34 @@ function filterSensitiveParams (data: any): any {
 }
 
 export default function LogRequestsMiddleware (req: Request, res: Response, next: NextFunction) {
-  Loggers.WebServer.writeLog(`[${req.method}] ${req.originalUrl}`)
+  const { method, originalUrl, body, query, ip, headers } = req
 
-  // Si es una solicitud POST o PUT, filtra los parámetros sensibles en el cuerpo
-  if (req.method === 'POST' || req.method === 'PUT') {
-    const filteredBody = filterSensitiveParams({ ...req.body })
-    Loggers.WebServer.writeLog(`[${req.method}] ${req.originalUrl} - Body: ${JSON.stringify(filteredBody)}`)
+  // Filtra los parámetros sensibles en el cuerpo (solo para POST y PUT)
+  const filteredBody = (method === 'POST' || method === 'PUT') ? filterSensitiveParams(body) : null
+
+  // Construye un objeto con la información relevante de la solicitud
+  const requestInfo = {
+    method,
+    originalUrl,
+    ip,
+    query,
+    body: filteredBody,
+    headers: {
+      contentType: headers['content-type'],
+      contentLength: headers['content-length']
+    }
   }
 
-  // También puedes agregar lógica para filtrar parámetros en otros lugares, como en los parámetros de consulta (req.query)
+  // Loggea toda la información relevante de la solicitud en líneas separadas
+  Loggers.WebServer.writeLog(`Incoming request:
+  Method: ${requestInfo.method}
+  URL: ${requestInfo.originalUrl}
+  IP: ${requestInfo.ip}
+  Query: ${JSON.stringify(requestInfo.query)}
+  Body: ${JSON.stringify(requestInfo.body)}
+  Headers: ${JSON.stringify(requestInfo.headers)}
+  `)
 
+  // Continúa con el siguiente middleware
   next()
 }
