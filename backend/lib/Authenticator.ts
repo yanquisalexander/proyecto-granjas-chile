@@ -1,3 +1,4 @@
+import Role from '@/app/models/Role.model'
 import User from '@/app/models/User.model'
 import { Configuration } from '@/config'
 import bcrypt from 'bcrypt'
@@ -14,6 +15,15 @@ interface JwtPayload {
   exp: number
 }
 
+export interface CurrentUser {
+  id: UUID
+  username: string
+  email: string
+  created_at?: Date
+  updated_at?: Date
+  roles?: Role[]
+}
+
 export class Authenticator {
   private readonly user?: User
 
@@ -21,12 +31,28 @@ export class Authenticator {
     this.user = user
   }
 
-  get currentUser (): User | undefined {
-    return this.user
+  async currentUser (): Promise<CurrentUser | null> {
+    if (!this.user) return null
+    const roles = await this.user.getRoles()
+    console.log(roles)
+    return {
+      id: this.user.id,
+      username: this.user.username,
+      email: this.user.email,
+      created_at: this.user.created_at,
+      updated_at: this.user.updated_at,
+      roles
+    }
   }
 
   get isAuthenticated (): boolean {
     return !!this.user
+  }
+
+  async hasNeededRoles (roles: Role[]): Promise<boolean> {
+    if (!this.user) return false
+    const userRoles = await this.user.getRoles()
+    return userRoles.some(userRole => roles.some(role => role.name === userRole.name))
   }
 
   static async hashPassword (password: string): Promise<string> {
