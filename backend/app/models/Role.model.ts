@@ -73,8 +73,20 @@ class Role {
     return result.rows.length > 0
   }
 
-  static async addRole (user: User, role: Roles): Promise<void> {
-    await Database.query('INSERT INTO user_roles (user_id, role_id) VALUES ($1, $2)', [user.id, role])
+  static async getRoles (user: User): Promise<Role[]> {
+    const result = await Database.query('SELECT role_id FROM user_roles WHERE user_id = $1', [user.id])
+    return result.rows.map(row => row.role_id)
+  }
+
+  static async addRole (user: User, role: Roles | number): Promise<void> {
+    if (typeof role === 'number') {
+      await Database.query('INSERT INTO user_roles (user_id, role_id) VALUES ($1, $2)', [user.id, role])
+    } else {
+      const roleInstance = await Role.find(role)
+      if (roleInstance) {
+        await Database.query('INSERT INTO user_roles (user_id, role_id) VALUES ($1, $2)', [user.id, roleInstance.id])
+      }
+    }
   }
 
   static async removeRole (user: User, role: Roles): Promise<void> {
