@@ -2,6 +2,7 @@ import Database from '@/lib/DatabaseManager'
 import User from '@/app/models/User.model'
 import { UUID } from 'crypto'
 import Enterprise from '@/app/models/Enterprise.model'
+import Form from './Form.model'
 
 interface WorkGroupAttributes {
   id: UUID
@@ -14,7 +15,7 @@ interface WorkGroupAttributes {
 }
 
 class WorkGroup {
-  id: string
+  id: UUID
   name: string
   description?: string
   users?: User[]
@@ -86,6 +87,10 @@ class WorkGroup {
   static async findByEnterprise (enterprise: Enterprise): Promise<WorkGroup[]> {
     const workGroups = await Database.query('SELECT * FROM work_groups WHERE enterprise_id = $1', [enterprise.id])
     return workGroups.rows
+  }
+
+  async getAssignedForms (): Promise<Form[]> {
+    return await Form.findByWorkGroupId(this.id)
   }
 }
 
