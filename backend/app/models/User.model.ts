@@ -180,7 +180,7 @@ class User {
     if (result.rows.length === 0) {
       return null
     }
-    return result.rows[0]
+    return new User(result.rows[0])
   }
 
   static async findByUsername (username: string): Promise<UserDTO | null> {
@@ -188,7 +188,7 @@ class User {
     if (result.rows.length === 0) {
       return null
     }
-    return result.rows[0]
+    return new User(result.rows[0])
   }
 
   static async search (filter: UserFilter): Promise<UserDTO[]> {

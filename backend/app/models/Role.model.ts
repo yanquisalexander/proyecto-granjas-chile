@@ -74,8 +74,8 @@ class Role {
   }
 
   static async getRoles (user: User): Promise<Role[]> {
-    const result = await Database.query('SELECT roles.name FROM user_roles INNER JOIN roles ON user_roles.role_id = roles.id WHERE user_roles.user_id = $1', [user.id])
-    return result.rows.map(row => row.name)
+    const result = await Database.query('SELECT * FROM user_roles INNER JOIN roles ON user_roles.role_id = roles.id WHERE user_roles.user_id = $1', [user.id])
+    return result.rows.map(row => new Role(row))
   }
 
   static async addRole (user: User, role: Roles): Promise<void> {
