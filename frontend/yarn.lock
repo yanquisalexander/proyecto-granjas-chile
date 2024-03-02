@@ -623,6 +623,13 @@
   dependencies:
     "@iconify/types" "*"
 
+"@iconify-json/tabler@^1.1.106":
+  version "1.1.106"
+  resolved "https://registry.yarnpkg.com/@iconify-json/tabler/-/tabler-1.1.106.tgz#cd19ab50de45be194977242fd310d8b8325b820d"
+  integrity sha512-TcGGQ2nDhb2OmKsMPk3SuNxf259Rjirbvkz3gX1C8fexJmSWqR8AsH98/VMbK7VVYb2L2FIfX3QJxKpJvXEryw==
+  dependencies:
+    "@iconify/types" "*"
+
 "@iconify/collections@^1.0.374":
   version "1.0.400"
   resolved "https://registry.yarnpkg.com/@iconify/collections/-/collections-1.0.400.tgz#4b9dd7e2c8b30e5bab8d6170adfc93de2337ec5b"

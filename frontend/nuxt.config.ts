@@ -7,6 +7,9 @@ export default defineNuxtConfig({
     '@nuxt/ui',
     '@sidebase/nuxt-auth'
   ],
+  ui: {
+    icons: ['tabler']
+  },
   auth: {
     baseURL: "http://localhost:3000/",
     globalAppMiddleware: true,
@@ -16,7 +19,7 @@ export default defineNuxtConfig({
     provider: {
       type: 'local',
       endpoints: {
-        signIn: { path: '/accounts/login', method: 'post' },
+        signIn: { path: '/accounts/login?webpanel=true', method: 'post' },
         getSession: { path: '/accounts/current_user', method: 'get' }
       },
       token: {
