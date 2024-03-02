@@ -9,7 +9,7 @@ export const Configuration = {
   IS_PRODUCTION: process.env.NODE_ENV === 'production',
   APPLICATION_PORT: parseInt(process.env.PORT || '3000'),
   APPLICATION_URL: process.env.APPLICATION_URL || 'localhost',
-  ENABLE_CORS: process.env.ENABLE_CORS === 'true',
+  ENABLE_CORS: Boolean(process.env.ENABLE_CORS === 'true'),
   ENABLE_HTTPS: process.env.ENABLE_HTTPS === 'true',
   CORS_ALLOWED_ORIGINS: process.env.CORS_ALLOWED_ORIGINS?.split(',').map((origin) => origin.trim()) || [],
   MAX_LOGS_TO_KEEP: parseInt(process.env.MAX_LOGS_TO_KEEP || '10'),
