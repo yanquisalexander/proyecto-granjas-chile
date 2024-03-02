@@ -9,11 +9,13 @@ const PARAMS_TO_FILTER = [
 
 function filterSensitiveParams (data: any): any {
   // Recorre las claves sensibles y filtra su valor en el objeto de datos
-  PARAMS_TO_FILTER.forEach((param) => {
+  // Clone the object to avoid modifying the original
+  data = { ...data }
+  for (const param of PARAMS_TO_FILTER) {
     if (data[param]) {
       data[param] = 'FILTERED'
     }
-  })
+  }
 
   return data
 }
