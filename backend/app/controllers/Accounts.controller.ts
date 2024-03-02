@@ -11,11 +11,18 @@ export class AccountsController {
       const { email, password } = req.body
       const user = await User.findByEmail(email)
       if (user && (await Authenticator.comparePassword(password, user.password))) {
+        const expiresIn = Date.now() + 1000 * 60 * 60
         const token = jwt.sign({ user_id: user.id }, Configuration.JWT_SECRET, {
-          expiresIn: '1h'
+          expiresIn
         })
 
-        res.json({ token })
+        res.json({
+          access_token: token,
+          token_type: 'Bearer',
+          expires_in: expiresIn,
+          scope: 'read write'
+
+        })
       } else {
         res.status(401).json({ message: 'Invalid credentials' })
       }
