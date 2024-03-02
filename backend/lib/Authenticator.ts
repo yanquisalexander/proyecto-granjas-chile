@@ -67,6 +67,7 @@ export class Authenticator {
   }
 
   static async comparePassword (password: string, hash: string): Promise<boolean> {
+    console.log(chalk.bgCyan.bold('[AUTHENTICATOR]'), chalk.white('Comparing password...'))
     return await bcrypt.compare(password, hash)
   }
 
