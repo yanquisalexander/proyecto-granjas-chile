@@ -65,16 +65,40 @@ class WebServer {
   }
 
   private setupCORS (applicationUrl: string, corsOrigins: string[]): void {
-    if (Configuration.ENABLE_CORS) {
-      this.applyMiddlewares([
-        cors({
-          origin: [applicationUrl, ...corsOrigins],
-          optionsSuccessStatus: 200
-        })
-      ])
-    } else {
+    if (!Configuration.ENABLE_CORS) {
       Loggers.WebServer.writeLog('ENABLE_CORS is set to false on environment variables. Skipping CORS middleware...')
+      this.applyMiddlewares([cors({
+        origin: '*'
+      })])
+      return
     }
+
+    // Agrega applicationUrl a corsOrigins si no está presente
+    if (!corsOrigins.includes(applicationUrl)) {
+      corsOrigins.push(applicationUrl)
+    }
+
+    const corsOptions = {
+      origin: (origin: string | undefined, callback: (error: Error | null, allow: boolean) => void) => {
+        if (!origin) {
+          callback(new Error('Origin not allowed'), false)
+          return
+        }
+        const isAllowed = corsOrigins.some((allowedOrigin) => {
+          const allowedOriginHostname = new URL(allowedOrigin).hostname
+          const originHostname = new URL(origin).hostname
+          return originHostname === allowedOriginHostname || originHostname.endsWith(`.${allowedOriginHostname}`)
+        })
+
+        if (isAllowed) {
+          callback(null, true)
+        } else {
+          callback(new Error('Origin not allowed'), false)
+        }
+      }
+    }
+
+    this.applyMiddlewares([cors(corsOptions)])
   }
 
   public async start (): Promise<void> {
