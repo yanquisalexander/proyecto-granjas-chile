@@ -64,7 +64,7 @@ export class AccountsController {
     const user = await User.find((req.user.id))
 
     if (!user) {
-      res.status(401).json({ message: 'Unauthorized' })
+      res.status(401).json({ message: 'The user that you are trying to access does not exist or has been deleted.' })
       return
     }
 
