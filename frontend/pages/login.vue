@@ -104,12 +104,12 @@ const handleSubmit = async () => {
 
         console.log("res", res)
     } catch (e) {
-        console.log("error", (e as any).response._data.message)
-        error.value = (e as any).response._data.message
         const toast = useToast()
+        console.log("e", e)
+        const errorMessage = (e as any).response?._data?.message || 'Error al conectarse al servidor'
         toast.add({
             title: 'Authentication error',
-            description: (e as any).response._data.message,
+            description: errorMessage,
             color: "red",
             icon: "i-tabler-face-id-error"
         })
