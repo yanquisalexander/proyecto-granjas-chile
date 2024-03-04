@@ -5,6 +5,7 @@ class CreateUserRolesTable extends Migration {
   static async up (): Promise<void> {
     // Write your migration logic here
     await Database.query(`CREATE TABLE user_roles (
+      id SERIAL PRIMARY KEY,
       user_id UUID REFERENCES users(id),
       role_id INTEGER REFERENCES roles(id))`)
   }
