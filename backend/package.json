@@ -1,8 +1,8 @@
 {
-  "name": "backend",
+  "name": "proyecto-granjas-backend",
   "version": "1.0.0",
   "description": "Backend de app de formularios para Granjas del Sur de Chile",
-  "main": "dist/index.js",
+  "main": "./dist/index.js",
   "author": "Alexander Barrios",
   "type": "module",
   "scripts": {
@@ -11,7 +11,12 @@
     "db:migrate": "tsx ./scripts/migrations.ts migrate",
     "db:drop": "tsx ./scripts/migrations.ts drop",
     "console": "tsx ./scripts/console.ts",
-    "test": "vitest"
+    "test": "vitest",
+    "build": "tsx ./scripts/build.ts",
+    "start": "node dist/index.cjs"
+  },
+  "exports": {
+    "require": "./dist/index.js"
   },
   "license": "MIT",
   "private": true,
@@ -26,12 +31,14 @@
     "@types/pg": "^8.11.0",
     "@types/readline-sync": "1.4.8",
     "@typescript-eslint/eslint-plugin": "^6.4.0",
+    "esbuild": "0.20.1",
     "eslint": "^8.0.1",
     "eslint-config-standard-with-typescript": "43.0.1",
     "eslint-plugin-import": "^2.25.2",
     "eslint-plugin-n": "^15.0.0 || ^16.0.0 ",
     "eslint-plugin-promise": "^6.0.0",
     "nodemon": "^3.1.0",
+    "pkgroll": "2.0.1",
     "tsx": "^4.7.1",
     "typescript": "*",
     "vite-tsconfig-paths": "4.3.1",
