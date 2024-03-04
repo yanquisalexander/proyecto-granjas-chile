@@ -1,4 +1,4 @@
-import Role from '@/app/models/Role.model'
+import Role, { Roles } from '@/app/models/Role.model'
 import User from '@/app/models/User.model'
 import WorkGroup from '@/app/models/WorkGroup.model'
 import { Configuration } from '@/config'
@@ -8,6 +8,7 @@ import { Request, Response, NextFunction } from 'express'
 import { UUID } from 'node:crypto'
 import passport from 'passport'
 import { Strategy as JwtStrategy, ExtractJwt } from 'passport-jwt'
+import * as readlineSync from 'readline-sync'
 
 const SALT_ROUNDS = 10
 
@@ -90,7 +91,7 @@ export class Authenticator {
     })(req, res, next)
   }
 
-  static initialize () {
+  static async initialize () {
     console.log('Initializing authenticator...')
     passport.use('jwt', new JwtStrategy({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -106,5 +107,46 @@ export class Authenticator {
         done(error, false)
       }
     }))
+
+    const usersCount = await User.count()
+    console.log(chalk.bgCyan.bold('[AUTHENTICATOR]'), chalk.white('Users count:'), usersCount)
+
+    if (usersCount === 1) {
+      console.log(chalk.bgCyan.bold('[AUTHENTICATOR]'), chalk.white('Only system user found. You should create a new user.'))
+      // Require the user to create a new user before continuing
+
+      const username = readlineSync.question('Username: ')
+      const email = readlineSync.question('Email: ')
+      let password = readlineSync.question('Password: ', {
+        hideEchoBack: true
+      })
+      const confirmPassword = readlineSync.question('Confirm password: ', {
+        hideEchoBack: true
+      })
+
+      if (password !== confirmPassword) {
+        console.log('Passwords do not match. Please restart the server and try again.')
+        process.exit(1)
+      }
+
+      password = await Authenticator.hashPassword(password)
+
+      const user = new User({
+        id: User.generateId(),
+        username,
+        email,
+        password
+      })
+
+      try {
+        await user.save()
+        console.log(chalk.bgCyan.bold('[AUTHENTICATOR]'), chalk.white('User created successfully'))
+        await user.addRole(Roles.SUPER_ADMIN)
+        console.log(chalk.bgCyan.bold('[AUTHENTICATOR]'), chalk.white(`User ${username} has been granted the SUPER_ADMIN role`))
+      } catch (error) {
+        console.error(chalk.bgRed.bold('[AUTHENTICATOR]'), chalk.white('Error creating user:'), error)
+        process.exit(1)
+      }
+    }
   }
 }

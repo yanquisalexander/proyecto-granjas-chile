@@ -199,6 +199,11 @@ class User {
   static generateId (): UUID {
     return crypto.randomUUID()
   }
+
+  static async count (): Promise<number> {
+    const result = await Database.query('SELECT COUNT(*) FROM users')
+    return parseInt(result.rows[0].count)
+  }
 }
 
 export default User
