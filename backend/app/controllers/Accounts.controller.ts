@@ -14,7 +14,7 @@ export class AccountsController {
       const user = await User.findByEmail(email)
 
       if (user && (await Authenticator.comparePassword(password, user.password))) {
-        const expiresIn = Date.now() + 1000 * 60 * 60
+        const expiresIn = '1hr'
         const token = jwt.sign({ user_id: user.id }, Configuration.JWT_SECRET, {
           expiresIn
         })

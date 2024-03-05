@@ -6,6 +6,7 @@ import FormatApiResponseMiddleware from '../middlewares/FormatApiResponse.middle
 import LogRequestsMiddleware from '../middlewares/LogRequests.middleware'
 import { Loggers } from '../services/loggers'
 import router from '../config/router'
+import bodyParser from 'body-parser'
 
 class WebServer {
   private readonly app: Express
@@ -37,8 +38,8 @@ class WebServer {
     app.set('applicationUrl', applicationUrl)
 
     webServer.applyMiddlewares([
-      express.json(),
-      express.urlencoded({ extended: true }),
+      bodyParser.json(),
+      bodyParser.urlencoded({ extended: true }),
       LogRequestsMiddleware
     ])
 

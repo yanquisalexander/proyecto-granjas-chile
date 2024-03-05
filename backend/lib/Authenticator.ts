@@ -91,6 +91,46 @@ export class Authenticator {
     })(req, res, next)
   }
 
+  static requiredRoleMiddleware (roles: Roles[]) {
+    // Roles is an Enum array
+    return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+      console.log(chalk.bgCyan.bold('[AUTHENTICATOR]'), chalk.white('Role middleware called'))
+      const user = req.user as User
+      const userRoles = await user.getRoles()
+      console.log(chalk.bgCyan.bold('[AUTHENTICATOR]'), chalk.white('User roles:'), userRoles)
+      console.log(chalk.bgCyan.bold('[AUTHENTICATOR]'), chalk.white('Required roles:'), roles)
+      console.log(chalk.bgCyan.bold('[AUTHENTICATOR]'), chalk.white('Checking if user has necessary roles...'))
+      const hasNecessaryRoles = userRoles.some(userRole => roles.some(role => role === userRole.name))
+      if (hasNecessaryRoles) {
+        next()
+      } else {
+        res.status(401).json({
+          message: "Your account doesn't have the necessary permissions to access this resource."
+        })
+      }
+    }
+  }
+
+  static hasSomeRolesMiddleware (roles: Roles[]) {
+    return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+      console.log(chalk.bgCyan.bold('[AUTHENTICATOR]'), chalk.white('Role middleware called'))
+      const user = req.user as User
+      const userRoles = await user.getRoles()
+      console.log(chalk.bgCyan.bold('[AUTHENTICATOR]'), chalk.white('User roles:'), userRoles)
+      console.log(chalk.bgCyan.bold('[AUTHENTICATOR]'), chalk.white('Required roles:'), roles)
+      console.log(chalk.bgCyan.bold('[AUTHENTICATOR]'), chalk.white('Checking if user has at least one necessary role...'))
+      const hasAtLeastOneRole = userRoles.some(userRole => roles.some(role => role === userRole.name))
+
+      if (hasAtLeastOneRole) {
+        next()
+      } else {
+        res.status(401).json({
+          message: "Your account doesn't have the necessary permissions to access this resource."
+        })
+      }
+    }
+  }
+
   static async initialize () {
     console.log('Initializing authenticator...')
     passport.use('jwt', new JwtStrategy({

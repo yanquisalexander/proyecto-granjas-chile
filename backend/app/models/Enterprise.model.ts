@@ -8,6 +8,7 @@ export interface EnterpriseAttributes {
   description?: string
   company_logo?: string
   created_at?: Date
+  updated_at?: Date
 }
 
 class Enterprise {
@@ -16,6 +17,7 @@ class Enterprise {
   description?: string
   company_logo?: string
   created_at?: Date
+  updated_at?: Date
 
   constructor (attributes: EnterpriseAttributes) {
     this.id = attributes.id
@@ -23,6 +25,7 @@ class Enterprise {
     this.description = attributes.description
     this.company_logo = attributes.company_logo
     this.created_at = attributes.created_at
+    this.updated_at = attributes.updated_at
   }
 
   static async getAll (): Promise<Enterprise[]> {

@@ -134,6 +134,7 @@ const languages = ref([
 ])
 
 definePageMeta({
+    layout: 'auth',
     auth: {
         unauthenticatedOnly: true,
         navigateAuthenticatedTo: '/'

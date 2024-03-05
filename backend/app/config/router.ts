@@ -23,7 +23,7 @@ router.use('/users', Authenticator.middleware, createUsersRouter())
 
 router.use('/accounts', createAccountsRouter())
 
-router.use('/enterprise', createEnterprisesRouter())
+router.use('/enterprise', Authenticator.middleware, createEnterprisesRouter())
 
 router.use('/forms', createFormsRouter())
 
