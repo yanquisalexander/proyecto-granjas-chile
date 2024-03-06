@@ -7,9 +7,9 @@
         </header>
 
 
-        <UTable :rows="enterprises" v-if="enterprises.length > 0" :columns="columns">
+        <UTable :rows="enterprises" v-if="enterprises && enterprises.length > 0" :columns="columns">
             <template #company_logo-data="{ row }">
-                <img :src="row.company_logo" :alt="`Logo de ${row.name}`" class="h-8 w-8" />
+                <img :src="row.company_logo" :alt="`Logo de ${row.name}`" class="h-8 w-8 object-cover" />
             </template>
 
             <template #name-data="{ row }">
@@ -19,7 +19,9 @@
             </template>
 
             <template #description-data="{ row }">
-                {{ row.description ?? '-' }}
+                <p class="max-w-xs truncate" :title="row.description">
+                    {{ row.description ?? '-' }}
+                </p>
             </template>
 
             <template #created_at-data="{ row }">
@@ -88,7 +90,7 @@
                     ¿Estás seguro que deseas eliminar la empresa <strong>{{ enterprises.find((enterprise) =>
                 enterprise.id ===
                 selectedEnterprise?.id)?.name }}</strong>?
-                    Introdcue el nombre de la empresa para confirmar la eliminación.
+                    Introduce el nombre de la empresa para confirmar la eliminación.
                 </p>
 
                 <UInput v-model="selectedEnterprise.name" label="Nombre de la empresa" class="p-4" />
@@ -100,7 +102,7 @@
                             Cancel
                         </UButton>
                         <UButton type="button" color="blue" @click="deleteEnterprise" :loading="deletingEnterprise"
-                            :disabled="selectedEnterprise.name !== enterprises.find((enterprise) => enterprise.id === selectedEnterprise?.id)?.name">
+                            :disabled="selectedEnterprise?.name !== enterprises.find((enterprise) => enterprise.id === selectedEnterprise?.id)?.name">
                             <UIcon name="i-tabler-trash" />
                             Eliminar
                         </UButton>
@@ -174,8 +176,9 @@ const showDeleteEnterpriseDialog = (id: string) => {
 
 const deleteEnterprise = async () => {
     deletingEnterprise.value = true
+    if (!token.value) return
     try {
-        const response = await fetch(`${Configuration.BACKEND_URL}/enterprise/${selectedEnterprise.value.id}`, {
+        const response = await fetch(`${Configuration.BACKEND_URL}/enterprise/${selectedEnterprise.value?.id}`, {
             method: 'DELETE',
             headers: {
                 'Authorization': token.value
@@ -216,6 +219,7 @@ const deleteEnterprise = async () => {
 
 const createEnterprise = async () => {
     creatingEnterprise.value = true
+    if (!token.value) return
     try {
         const response = await fetch(`${Configuration.BACKEND_URL}/enterprise`, {
             method: 'POST',
@@ -265,6 +269,7 @@ const createEnterprise = async () => {
 }
 
 const fetchEnterprises = async () => {
+    if (!token.value) return
     try {
         const res = await fetch(`${Configuration.BACKEND_URL}/enterprise`, {
             headers: {
@@ -278,10 +283,7 @@ const fetchEnterprises = async () => {
     }
 }
 
-onMounted(async () => {
-    await fetchEnterprises()
-})
-
+await fetchEnterprises()
 /*  {
     "id": "2f9f321a-5a91-4cec-a3d0-f04b46c47ab6",
     "name": "New Enterprise",

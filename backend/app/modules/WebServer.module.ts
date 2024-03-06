@@ -7,6 +7,9 @@ import LogRequestsMiddleware from '../middlewares/LogRequests.middleware'
 import { Loggers } from '../services/loggers'
 import router from '../config/router'
 import bodyParser from 'body-parser'
+import multer from 'multer'
+import path from 'node:path'
+const __dirname = path.resolve()
 
 class WebServer {
   private readonly app: Express
@@ -40,12 +43,15 @@ class WebServer {
     webServer.applyMiddlewares([
       bodyParser.json(),
       bodyParser.urlencoded({ extended: true }),
+      multer().any(),
       LogRequestsMiddleware
     ])
 
     webServer.setupCORS(applicationUrl, corsOrigins)
 
     app.use('/', router)
+
+    app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')))
 
     app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
       res.status(500).json({

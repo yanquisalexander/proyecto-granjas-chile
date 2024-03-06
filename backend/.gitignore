@@ -6,3 +6,4 @@ node_modules/
 logs/*.txt
 db/.migration_history
 dist/
+public/uploads/*

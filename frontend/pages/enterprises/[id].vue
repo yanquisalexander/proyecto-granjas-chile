@@ -12,24 +12,40 @@
                     <span>Regresar</span>
                 </UButton>
             </header>
-            {{
-            enterprise
-        }}
 
-            <div class="flex flex-col">
+            <div class="flex flex-col space-y-6">
+
+                <UFormGroup label="ID de Empresa" name="id">
+                    <div class="flex items-center w-full">
+                        <UInput v-model="editedEnterprise.id" disabled class="flex-1" />
+                        <UButton variant="soft" color="gray" @click="copyEnterpriseIdToClipboard">
+                            <UIcon name="i-tabler-copy" />
+                        </UButton>
+                    </div>
+                </UFormGroup>
+
                 <UFormGroup label="Nombre de la empresa" name="name">
                     <UInput v-model="editedEnterprise.name" />
                 </UFormGroup>
 
                 <UFormGroup label="Logo" name="logo">
-                    <UInput type="file" accept="image/*" @change="e => editedEnterprise.logo = e.target.files[0]" />
+                    <img class="preview h-32" :src="imageToPreview || enterprise.company_logo"
+                        :alt="`Logo de ${enterprise.name}`" />
+                    <UInput type="file" accept="image/*" @change="handleImageChange" />
                 </UFormGroup>
 
 
                 <UFormGroup label="Descripción" name="description">
-                    <UTextarea v-model="editedEnterprise.description" />
+                    <UTextarea v-model="editedEnterprise.description" autoresize />
                 </UFormGroup>
 
+                <UFormGroup label="Empresa creada el" name="created_at">
+                    <p>{{ new Date(enterprise.created_at).toLocaleDateString() }}</p>
+                </UFormGroup>
+
+                <UFormGroup label="Última actualización" name="updated_at">
+                    <p>{{ new Date(enterprise.updated_at).toLocaleDateString() }}</p>
+                </UFormGroup>
                 <footer class="flex justify-end mt-4">
                     <UButton color="blue" @click="updateEnterprise">
                         Guardar cambios
@@ -53,12 +69,38 @@ const route = useRoute()
 const { token } = useAuth()
 const toast = useToast()
 
+const imageToPreview = ref<string | null>(null)
 const enterprise = ref<Enterprise | null>(null)
 const editedEnterprise = ref<Enterprise | null>(null)
+
+const copyEnterpriseIdToClipboard = () => {
+    if (!editedEnterprise.value) return
+    navigator.clipboard.writeText(editedEnterprise.value.id)
+    toast.add({
+        title: 'ID de empresa copiado',
+        description: 'El ID de la empresa ha sido copiado al portapapeles',
+        color: "green",
+        icon: "i-tabler-check"
+    })
+}
+
+const handleImageChange = (event: Event) => {
+    const target = event.target as HTMLInputElement
+    const file = target.files?.[0]
+    if (!file) return
+    editedEnterprise.value.company_logo = file
+    const reader = new FileReader()
+    reader.onload = (e) => {
+        imageToPreview.value = e.target?.result as string
+    }
+
+    reader.readAsDataURL(file)
+}
 
 const fetchEnterprise = async () => {
     const { id } = route.params
     console.log(id)
+    if (!token.value) return
     const response = await fetch(`${Configuration.BACKEND_URL}/enterprise/${id}`, {
         headers: {
             'Authorization': token.value
@@ -72,10 +114,13 @@ const fetchEnterprise = async () => {
 const updateEnterprise = async () => {
     const { id } = route.params
     const formData = new FormData()
-    if (!editedEnterprise.value) return
-    formData.append('name', editedEnterprise.value.name)
-    formData.append('description', editedEnterprise.value.description)
-    formData.append('logo', editedEnterprise.value.logo)
+    if (!editedEnterprise.value || !enterprise.value) return
+    for (const key in editedEnterprise.value) {
+        if (editedEnterprise.value[key as keyof Enterprise] !== enterprise.value[key as keyof Enterprise]) {
+            formData.append(key, editedEnterprise.value[key as keyof Enterprise])
+        }
+    }
+    if (!token.value) return
 
     const response = await fetch(`${Configuration.BACKEND_URL}/enterprise/${id}`, {
         method: 'PUT',

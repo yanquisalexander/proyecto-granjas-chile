@@ -29,7 +29,7 @@ class Enterprise {
   }
 
   static async getAll (): Promise<Enterprise[]> {
-    const enterprises = await Database.query('SELECT * FROM enterprises')
+    const enterprises = await Database.query('SELECT * FROM enterprises ORDER BY name')
     return enterprises.rows
   }
 
