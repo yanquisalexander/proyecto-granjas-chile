@@ -4,5 +4,8 @@
 </template>
 
 <script setup>
-setPageLayout('default')
+
+useHead({
+    title: 'Inicio',
+})
 </script>

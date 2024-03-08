@@ -1,3 +1,4 @@
+import Enterprise from '@/app/models/Enterprise.model'
 import Role, { Roles } from '@/app/models/Role.model'
 import User from '@/app/models/User.model'
 import WorkGroup from '@/app/models/WorkGroup.model'
@@ -26,6 +27,7 @@ export interface CurrentUser {
   updated_at?: Date
   roles?: Role[]
   workgroups?: WorkGroup[]
+  enterprise?: Enterprise | null
 }
 
 export class Authenticator {
@@ -39,6 +41,7 @@ export class Authenticator {
     if (!this.user) return null
     const roles = await this.user.getRoles()
     const workgroups = await this.user.getWorkGroups()
+    const enterprise = await this.user.getEnterprise()
     console.log(roles)
     return {
       id: this.user.id,
@@ -47,7 +50,8 @@ export class Authenticator {
       created_at: this.user.created_at,
       updated_at: this.user.updated_at,
       roles,
-      workgroups
+      workgroups,
+      enterprise
     }
   }
 
@@ -78,6 +82,8 @@ export class Authenticator {
       console.log(chalk.bgCyan.bold('[PASSPORT]'), chalk.white('Error:'), err)
       console.log(chalk.bgCyan.bold('[PASSPORT]'), chalk.white('User:'), user)
       if (err || !user) {
+        console.log(' 😐Error:', err)
+        console.log(' 😐User:', user)
         res.status(401).json({
           errors: [
             "Looks like you're not authenticated. Please log in and try again."
@@ -142,6 +148,7 @@ export class Authenticator {
       console.log(chalk.bgCyan.bold('[PASSPORT]'), chalk.white('Payload:'), jwtPayload)
       try {
         const user = await User.find(jwtPayload.user_id)
+        console.log(chalk.bgCyan.bold('[PASSPORT]'), chalk.white('User found:'), user)
         done(null, user || null)
       } catch (error) {
         done(error, false)

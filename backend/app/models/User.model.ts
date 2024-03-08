@@ -5,6 +5,7 @@ import { z } from 'zod'
 import Role, { Roles } from './Role.model'
 import { Constants } from '../consts'
 import WorkGroup from './WorkGroup.model'
+import Enterprise from './Enterprise.model'
 
 export interface UserAttributes {
   id: UUID
@@ -15,6 +16,7 @@ export interface UserAttributes {
   updated_at?: Date
   roles?: Role[]
   workgroups?: WorkGroup[]
+  enterprise?: Enterprise
 }
 
 export interface UserDTO {
@@ -70,6 +72,7 @@ class User {
   created_at?: Date
   updated_at?: Date
   workgroups?: WorkGroup[]
+  enterprise?: Enterprise
 
   constructor (attributes: UserAttributes) {
     this.id = attributes.id
@@ -79,6 +82,7 @@ class User {
     this.created_at = attributes.created_at
     this.updated_at = attributes.updated_at
     this.workgroups = attributes.workgroups
+    this.enterprise = attributes.enterprise
   }
 
   async validate (): Promise<void> {
@@ -160,6 +164,21 @@ class User {
 
   async getWorkGroups (): Promise<WorkGroup[]> {
     return await WorkGroup.findByUserId(this)
+  }
+
+  async getEnterprise (): Promise<Enterprise | null> {
+    const result = await Database.query(`
+      SELECT e.id, e.name, e.description, e.company_logo, e.created_at, e.updated_at
+      FROM enterprises e
+      JOIN users u ON e.id = u.enterprise_id
+      WHERE u.id = $1
+    `, [this.id])
+
+    if (result.rows.length === 0) {
+      return null
+    }
+
+    return new Enterprise(result.rows[0])
   }
 
   static async find (id: UUID): Promise<User | null> {

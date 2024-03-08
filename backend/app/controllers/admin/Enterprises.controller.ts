@@ -1,9 +1,10 @@
 import { Request, Response, NextFunction } from 'express'
-import Enterprise from '../models/Enterprise.model'
+import Enterprise from '@/app/models/Enterprise.model'
 import { UUID } from 'node:crypto'
 import fs from 'fs'
+import User from '@/app/models/User.model'
 
-export class EnterprisesController {
+export class AdminEnterprisesController {
   async getEnterprises (req: Request, res: Response, next: NextFunction): Promise<void> {
     const enterprises = await Enterprise.getAll()
     res.json(enterprises)
@@ -99,5 +100,26 @@ export class EnterprisesController {
       return
     }
     res.json(enterprise)
+  }
+
+  async getMyEnterprise (req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      // @ts-expect-error id is not in Request
+      const user = await User.find(req.user.id)
+      const enterprise = await user?.getEnterprise()
+      if (!enterprise) {
+        res.status(404).json({
+          message: 'Enterprise not found.'
+        })
+        return
+      }
+      res.json(enterprise)
+    } catch (error) {
+      console.log(error)
+      res.status(500).json({
+        message: (error as Error).message,
+        error_type: (error as Error).name
+      })
+    }
   }
 }

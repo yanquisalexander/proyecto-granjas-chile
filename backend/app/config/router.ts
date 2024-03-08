@@ -1,6 +1,6 @@
 import { Router } from 'express'
 import { createUsersRouter } from './routes/users'
-import { createEnterprisesRouter } from './routes/enterprises'
+import { createAdminEnterprisesRouter } from './routes/admin/enterprises'
 import { Authenticator } from '@/lib/Authenticator'
 import { createAccountsRouter } from './routes/accounts'
 import { createFormsRouter } from './routes/forms'
@@ -23,7 +23,7 @@ router.use('/users', Authenticator.middleware, createUsersRouter())
 
 router.use('/accounts', createAccountsRouter())
 
-router.use('/enterprise', Authenticator.middleware, createEnterprisesRouter())
+router.use('/admin/enterprises', Authenticator.middleware, createAdminEnterprisesRouter())
 
 router.use('/forms', createFormsRouter())
 
