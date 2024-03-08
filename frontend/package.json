@@ -14,6 +14,7 @@
     "@iconify-json/fluent": "^1.1.49",
     "@iconify-json/tabler": "^1.1.106",
     "@nuxt/ui": "^2.14.1",
+    "axios": "^1.6.7",
     "nuxt": "^3.10.3",
     "vue": "^3.4.19",
     "vue-router": "^4.3.0"

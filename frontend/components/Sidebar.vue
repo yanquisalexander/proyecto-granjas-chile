@@ -1,5 +1,5 @@
 <template>
-    <v-navigation-drawer app elevation="0" mobile-breakpoint="lg" border="0" left>
+    <v-navigation-drawer app elevation="0" mobile-breakpoint="lg" border="0" left v-if="user">
         <!-- ---------------------------------------------- -->
         <!---Navigation -->
         <!-- ---------------------------------------------- -->
@@ -18,9 +18,7 @@
                 <v-list-item-action>
                     <v-icon>mdi-logout</v-icon>
                 </v-list-item-action>
-                <v-list-item-content>
-                    <v-list-item-title>Cerrar Sesión</v-list-item-title>
-                </v-list-item-content>
+                <v-list-item-title>Cerrar Sesión</v-list-item-title>
             </v-list-item>
         </v-list>
     </v-navigation-drawer>
@@ -53,19 +51,19 @@ const sidebarLinks = ref([
         title: 'Empresas / PyMES',
         icon: 'i-tabler-building',
         to: '/enterprises',
-        visible: user.roles.find((role: any) => role.name === 'super_admin')
+        visible: user?.roles.find((role: any) => role.name === 'super_admin')
     },
     {
         title: 'Mi Empresa',
         icon: 'i-tabler-users-group',
         to: '/enterprise',
-        visible: user.roles.find((role: any) => role.name === 'admin')
+        visible: user?.roles.find((role: any) => role.name === 'admin')
     },
     {
         title: 'Usuarios',
         icon: 'i-tabler-users',
         to: '/users',
-        visible: user.roles.find((role: any) => role.name === 'super_admin')
+        visible: user?.roles.find((role: any) => role.name === 'super_admin')
     }
 ])
 </script>

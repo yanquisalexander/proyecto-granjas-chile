@@ -1,6 +1,6 @@
 <template>
-    <div class="bg-white p-4 rounded-md">
-        <header class="flex my-6">
+    <div class="bg-white p-2 px-4 rounded-md">
+        <header class="flex my-4">
             <h1 class="text-xl font-medium">Empresas / PyMES</h1>
             <div class="flex-1"></div>
             <UButton @click="showCreateEnterpriseDialog">Crear Empresa</UButton>
