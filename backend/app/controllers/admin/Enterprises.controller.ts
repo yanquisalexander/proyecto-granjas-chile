@@ -7,7 +7,16 @@ import User from '@/app/models/User.model'
 export class AdminEnterprisesController {
   async getEnterprises (req: Request, res: Response, next: NextFunction): Promise<void> {
     const enterprises = await Enterprise.getAll()
-    res.json(enterprises)
+
+    const enterprisesWithAdmins = await Promise.all(enterprises.map(async (enterprise) => {
+      const admins = await enterprise.getAdmins()
+      return {
+        ...enterprise,
+        admins
+      }
+    }))
+    
+    res.json(enterprisesWithAdmins)
   }
 
   async createEnterprise (req: Request, res: Response, next: NextFunction): Promise<void> {
@@ -92,14 +101,29 @@ export class AdminEnterprisesController {
 
   async getEnterprise (req: Request, res: Response, next: NextFunction): Promise<void> {
     const { id } = req.params
-    const enterprise = await Enterprise.findById(id as UUID)
-    if (!enterprise) {
-      res.status(404).json({
-        message: 'Enterprise not found.'
+    try {
+      const enterprise = await Enterprise.findById(id as UUID)
+      if (!enterprise) {
+        res.status(404).json({
+          message: 'Enterprise not found.'
+        })
+        return
+      }
+
+      const admins = await enterprise.getAdmins()
+      
+      res.json({
+        ...enterprise,
+        admins
       })
-      return
+    } catch (error) {
+      if (error) {
+        res.status(500).json({
+          message: (error as Error).message,
+          error_type: (error as Error).name
+        })
+      }
     }
-    res.json(enterprise)
   }
 
   async getMyEnterprise (req: Request, res: Response, next: NextFunction): Promise<void> {

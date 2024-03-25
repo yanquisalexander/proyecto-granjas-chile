@@ -1,6 +1,8 @@
 import Database from '@/lib/DatabaseManager'
 import { UUID } from 'crypto'
 import WorkGroup from './WorkGroup.model'
+import { Roles } from "./Role.model"
+import User from "./User.model"
 
 export interface EnterpriseAttributes {
   id: UUID
@@ -30,7 +32,8 @@ class Enterprise {
 
   static async getAll (): Promise<Enterprise[]> {
     const enterprises = await Database.query('SELECT * FROM enterprises ORDER BY name')
-    return enterprises.rows
+    
+    return enterprises.rows.map((enterprise) => new Enterprise(enterprise))
   }
 
   static async findById (id: UUID): Promise<Enterprise | null> {
@@ -56,6 +59,22 @@ class Enterprise {
   async getWorkGroups (): Promise<WorkGroup[]> {
     const workGroups = await WorkGroup.findByEnterprise(this)
     return workGroups
+  }
+
+  async getAdmins (): Promise<any[]> {
+    // join de user_roles con users (role_id)
+    // enterprise_id viene de users
+
+    const admins = await Database.query(`
+    SELECT users.id, users.username, users.email, users.enterprise_id 
+FROM users 
+JOIN user_roles ON users.id = user_roles.user_id 
+WHERE user_roles.role_id = $1 AND users.enterprise_id = $2
+    `, [3, this.id])
+
+    return admins.rows
+
+    
   }
 }
 

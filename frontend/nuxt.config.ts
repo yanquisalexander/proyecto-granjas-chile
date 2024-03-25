@@ -1,5 +1,4 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
-import vuetify, { transformAssetUrls } from 'vite-plugin-vuetify'
 import { Configuration } from "./config"
 
 export default defineNuxtConfig({
@@ -8,13 +7,11 @@ export default defineNuxtConfig({
   modules: [
     '@nuxt/ui',
     '@sidebase/nuxt-auth',
-    (_options, nuxt) => {
-      nuxt.hooks.hook('vite:extendConfig', (config) => {
-        // @ts-expect-error
-        config.plugins.push(vuetify({ autoImport: true }))
-      })
-    },
+    '@nuxt/eslint',
   ],
+  experimental: {
+    viewTransition: true,
+  },
   ui: {
     icons: ['tabler', 'fluent']
   },
@@ -28,7 +25,8 @@ export default defineNuxtConfig({
       type: 'local',
       endpoints: {
         signIn: { path: '/accounts/login?webpanel=true', method: 'post' },
-        getSession: { path: '/accounts/current_user', method: 'get' }
+        getSession: { path: '/accounts/current_user', method: 'get' },
+        signOut: { path: '/accounts/logout', method: 'post' },
       },
       token: {
         signInResponseTokenPointer: '/access_token'
@@ -44,14 +42,4 @@ export default defineNuxtConfig({
       }
     }
   },
-  vite: {
-    vue: {
-      template: {
-        transformAssetUrls,
-      },
-    },
-  },
-  build: {
-    transpile: ['vuetify'],
-  }
 })

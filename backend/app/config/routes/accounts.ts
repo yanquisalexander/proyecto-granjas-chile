@@ -16,6 +16,9 @@ export const createAccountsRouter = (): Router => {
         En producción, el registro de usuarios debe ser manejado por un administrador.
     */
     router.post('/register', accountsController.register)
+
+    // TODO: Esta ruta debe anular el token de acceso del usuario actual.
+    router.post('/logout', (req, res) => res.send('Logout'))
   }
 
   return router

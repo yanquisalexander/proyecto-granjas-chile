@@ -1,3 +1,10 @@
+type EnterpriseAdmin = {
+    id: string;
+    email: string;
+    username: string;
+    name: string;
+}
+
 export type Enterprise = {
     id: string;
     name: string;
@@ -6,4 +13,5 @@ export type Enterprise = {
     description: string;
     createdAt: string;
     updatedAt: string;
+    admins?: EnterpriseAdmin[];
 };

@@ -15,13 +15,25 @@
     "@iconify-json/tabler": "^1.1.106",
     "@nuxt/ui": "^2.14.1",
     "axios": "^1.6.7",
-    "nuxt": "^3.10.3",
+    "nuxt": "^3.11.1",
     "vue": "^3.4.19",
     "vue-router": "^4.3.0"
   },
   "devDependencies": {
+    "@formkit/auto-animate": "^0.8.1",
+    "@nuxt/eslint": "^0.3.0-beta.3",
+    "@nuxt/eslint-config": "^0.2.0",
+    "@nuxtjs/eslint-module": "^4.1.0",
     "@sidebase/nuxt-auth": "^0.6.7",
+    "@typescript-eslint/eslint-plugin": "^6.4.0",
+    "eslint": "^8.57.0",
+    "eslint-config-standard-with-typescript": "^43.0.1",
+    "eslint-plugin-import": "^2.25.2",
+    "eslint-plugin-n": "^15.0.0 || ^16.0.0 ",
+    "eslint-plugin-promise": "^6.0.0",
+    "eslint-plugin-vue": "^9.23.0",
     "sass": "^1.71.1",
+    "typescript": "*",
     "vite-plugin-vuetify": "^2.0.2",
     "vuetify": "^3.5.7"
   }

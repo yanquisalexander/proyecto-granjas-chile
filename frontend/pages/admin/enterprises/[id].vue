@@ -1,19 +1,24 @@
 <template>
-    <div class="bg-white p-4 rounded-md">
+    <div class="bg-white p-2 px-4 rounded-md">
 
         <template v-if="enterprise && editedEnterprise">
-            <header class="flex my-6">
+            <header class="flex my-4">
                 <h1 class="text-xl font-medium">
                     Editando <em>{{ enterprise.name }}</em>
                 </h1>
                 <div class="flex-1"></div>
-                <UButton to="/enterprises" color="gray" variant="soft">
+                <UButton to="/admin/enterprises" color="gray" variant="soft">
                     <UIcon name="i-tabler-arrow-back" />
                     <span>Regresar</span>
                 </UButton>
             </header>
 
             <div class="flex flex-col space-y-6">
+
+                <UAlert v-if="enterprise.admins?.length === 0" color="red" title="Empresa sin administradores"
+                    variant="soft" icon="i-tabler-user-x"
+                    description="Esta empresa no tiene administradores asignados. Se recomienda asignar al menos un administrador para poder gestionar la empresa." />
+
 
                 <UFormGroup label="ID de Empresa" name="id">
                     <div class="flex items-center w-full">
@@ -45,6 +50,15 @@
 
                 <UFormGroup label="Última actualización" name="updated_at">
                     <p>{{ new Date(enterprise.updated_at).toLocaleDateString() }}</p>
+                </UFormGroup>
+
+                <UFormGroup label="Administradores" name="admins">
+                    <ul class="list-disc list-inside">
+                        {{ enterprise.admins }}
+                        <li v-for="admin in enterprise.admins" :key="admin.id">
+                            <NuxtLink class="text-blue-500" :to="`/users/${admin.id}`">{{ admin.username }}</NuxtLink>
+                        </li>
+                    </ul>
                 </UFormGroup>
                 <footer class="flex justify-end mt-4">
                     <UButton color="blue" @click="updateEnterprise">
@@ -101,7 +115,7 @@ const fetchEnterprise = async () => {
     const { id } = route.params
     console.log(id)
     if (!token.value) return
-    const response = await fetch(`${Configuration.BACKEND_URL}/enterprise/${id}`, {
+    const response = await fetch(`${Configuration.BACKEND_URL}/admin/enterprises/${id}`, {
         headers: {
             'Authorization': token.value
         }
@@ -122,7 +136,7 @@ const updateEnterprise = async () => {
     }
     if (!token.value) return
 
-    const response = await fetch(`${Configuration.BACKEND_URL}/enterprise/${id}`, {
+    const response = await fetch(`${Configuration.BACKEND_URL}/admin/enterprises/${id}`, {
         method: 'PUT',
         headers: {
             'Authorization': token.value

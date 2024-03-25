@@ -99,10 +99,6 @@ const handleSubmit = async () => {
         }, {
             callbackUrl: '/'
         })
-
-
-
-        console.log("res", res)
     } catch (e) {
         const toast = useToast()
         console.log("e", e)
