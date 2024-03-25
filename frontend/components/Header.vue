@@ -52,6 +52,12 @@ const headerLinks = ref([
         visible: user?.roles.find((role: any) => role.name === "admin"),
     },
     {
+        to: "/forms",
+        label: "Formularios",
+        icon: "i-tabler-file-text",
+        visible: user?.roles.find((role: any) => role.name === "admin"),
+    },
+    {
         to: "/admin/users",
         label: "Usuarios",
         icon: "i-tabler-users",

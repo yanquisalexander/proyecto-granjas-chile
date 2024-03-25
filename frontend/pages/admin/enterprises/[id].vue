@@ -88,8 +88,8 @@ const enterprise = ref<Enterprise | null>(null)
 const editedEnterprise = ref<Enterprise | null>(null)
 
 const copyEnterpriseIdToClipboard = () => {
-    if (!editedEnterprise.value) return
-    navigator.clipboard.writeText(editedEnterprise.value.id)
+    if (!enterprise.value) return
+    navigator.clipboard.writeText(enterprise.value.id)
     toast.add({
         title: 'ID de empresa copiado',
         description: 'El ID de la empresa ha sido copiado al portapapeles',
@@ -102,7 +102,8 @@ const handleImageChange = (event: Event) => {
     const target = event.target as HTMLInputElement
     const file = target.files?.[0]
     if (!file) return
-    editedEnterprise.value.company_logo = file
+    if (!editedEnterprise.value) return
+    editedEnterprise.value.company_logo = file as any
     const reader = new FileReader()
     reader.onload = (e) => {
         imageToPreview.value = e.target?.result as string
@@ -143,6 +144,17 @@ const updateEnterprise = async () => {
         },
         body: formData
     })
+
+    if (!response.ok) {
+        toast.add({
+            title: 'Error al actualizar la empresa',
+            description: 'Ocurrió un error al actualizar la empresa. Por favor, intenta de nuevo.',
+            color: "red",
+            icon: "i-tabler-alert-triangle"
+        })
+        return
+    }
+
     const data = await response.json()
     toast.add({
         title: 'Empresa actualizada',

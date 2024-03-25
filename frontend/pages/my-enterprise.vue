@@ -5,10 +5,7 @@
                 Mi Empresa
             </h1>
             <div class="flex-1"></div>
-            <UButton to="/enterprise/edit" color="blue" variant="soft">
-                <UIcon name="i-tabler-edit" />
-                <span>Editar</span>
-            </UButton>
+
         </header>
 
         <UTabs :items="tabs" class="w-full" @change="handleTabChange">

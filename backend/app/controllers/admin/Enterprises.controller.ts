@@ -20,9 +20,11 @@ export class AdminEnterprisesController {
   }
 
   async createEnterprise (req: Request, res: Response, next: NextFunction): Promise<void> {
-    const { name, description, company_logo } = req.body
+    const { name, description } = req.body
+    let company_logo = "https://cdn.icon-icons.com/icons2/1863/PNG/512/business_119337.png"
+    // Default logo when creating enterprise
     const id = crypto.randomUUID()
-    const enterprise = new Enterprise({ id, name, description, company_logo })
+    const enterprise = new Enterprise({ id, name, company_logo })
     try {
       await enterprise.create()
       res.json(enterprise)
@@ -140,6 +142,32 @@ export class AdminEnterprisesController {
       res.json(enterprise)
     } catch (error) {
       console.log(error)
+      res.status(500).json({
+        message: (error as Error).message,
+        error_type: (error as Error).name
+      })
+    }
+  }
+
+  async updateMyEnterprise (req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      // @ts-expect-error id is not in Request
+      const user = await User.find(req.user.id)
+      const enterprise = await user?.getEnterprise()
+      if (!enterprise) {
+        res.status(404).json({
+          message: 'Enterprise not found.'
+        })
+        return
+      }
+
+      const { name, description } = req.body
+      enterprise.name = name || enterprise.name
+      enterprise.description = description || enterprise.description
+      enterprise.updated_at = new Date()
+      await enterprise.update()
+      res.json(enterprise)
+    } catch (error) {
       res.status(500).json({
         message: (error as Error).message,
         error_type: (error as Error).name

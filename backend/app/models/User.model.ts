@@ -25,6 +25,7 @@ export interface UserDTO {
   email: string
   created_at?: Date
   updated_at?: Date
+  enterprise_name?: string
 }
 
 export interface UserFilter {
@@ -190,7 +191,20 @@ class User {
   }
 
   static async getAll (): Promise<UserDTO[]> {
-    const result = await Database.query('SELECT id, username, email, created_at, updated_at FROM users')
+    const result = await Database.query(`
+    SELECT 
+      u.id,
+      u.username,
+      u.email,
+      u.created_at,
+      u.updated_at,
+      e.name as enterprise_name
+    FROM
+      users u
+    LEFT JOIN
+      enterprises e ON u.enterprise_id = e.id
+    `
+    )
     return result.rows
   }
 
@@ -210,10 +224,25 @@ class User {
     return new User(result.rows[0])
   }
 
-  static async search (filter: UserFilter): Promise<UserDTO[]> {
-    const result = await Database.query('SELECT id, username, email, created_at, updated_at FROM users WHERE username LIKE $1 OR email LIKE $2', [`%${filter.username}%`, `%${filter.email}%`])
+  static async search(filter: UserFilter): Promise<UserDTO[]> {
+    const result = await Database.query(`
+    SELECT 
+      u.id, 
+      u.username, 
+      u.email, 
+      u.created_at, 
+      u.updated_at,
+      e.name as enterprise_name
+    FROM 
+      users u
+    LEFT JOIN 
+      enterprises e ON u.enterprise_id = e.id
+    WHERE 
+      u.username LIKE $1 OR u.email LIKE $2`
+    , [`%${filter.username}%`, `%${filter.email}%`])
     return result.rows
-  }
+}
+
 
   static generateId (): UUID {
     return crypto.randomUUID()

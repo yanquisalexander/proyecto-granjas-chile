@@ -24,6 +24,7 @@ router.use('/users', Authenticator.middleware, createUsersRouter())
 router.use('/accounts', createAccountsRouter())
 
 router.use('/admin/enterprises', Authenticator.middleware, createAdminEnterprisesRouter())
+router.use('/admin/users', Authenticator.middleware, createUsersRouter())
 
 router.use('/forms', createFormsRouter())
 
