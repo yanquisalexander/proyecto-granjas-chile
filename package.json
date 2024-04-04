@@ -11,7 +11,7 @@
     "scripts": {
         "run-backend": "yarn workspace backend dev",
         "run-frontend": "yarn workspace frontend dev",
-        "dev": "concurrently \"yarn workspace backend dev\" \"yarn workspace frontend dev\""
+        "dev": "concurrently \"yarn workspace backend dev\" \"yarn workspace frontend dev -p 7777\""
     },
     "author": "Alexander Barrios",
     "license": "MIT",
