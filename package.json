@@ -1,0 +1,21 @@
+{
+    "name": "proyecto-granjas-chile",
+    "version": "1.0.0",
+    "description": "Proyecto de granjas en Chile",
+    "private": true,
+    "workspaces": [
+        "backend",
+        "frontend",
+        "mobile"
+    ],
+    "scripts": {
+        "run-backend": "yarn workspace backend dev",
+        "run-frontend": "yarn workspace frontend dev",
+        "dev": "concurrently \"yarn workspace backend dev\" \"yarn workspace frontend dev\""
+    },
+    "author": "Alexander Barrios",
+    "license": "MIT",
+    "devDependencies": {
+        "concurrently": "^7.0.0"
+    }
+}

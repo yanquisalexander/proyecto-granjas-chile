@@ -1,5 +1,5 @@
 {
-  "name": "proyecto-granjas-backend",
+  "name": "backend",
   "version": "1.0.0",
   "description": "Backend de app de formularios para Granjas del Sur de Chile",
   "main": "./dist/index.js",
