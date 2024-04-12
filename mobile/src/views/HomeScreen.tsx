@@ -8,6 +8,7 @@ import { JSONText } from "@/components/JSONText";
 import { Emote } from "@/components/Emote";
 import { NoEnterpriseAsigned } from "@/components/home/NoEnterpriseAsigned";
 import { MyEnterprise } from "@/components/home/MyEnterprise";
+import LoggedAsAdmin from "@/components/home/LoggedAsAdmin";
 
 
 const styles = StyleSheet.create({
