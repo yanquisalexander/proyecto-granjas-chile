@@ -1,4 +1,4 @@
-const ENABLE_DEBUG = true;
+const ENABLE_DEBUG = false;
 
 export const Constants = (() => {
     const IS_DEVELOPMENT = process.env.NODE_ENV === "development";
