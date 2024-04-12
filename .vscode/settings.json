@@ -3,5 +3,6 @@
         "frontend",
         "backend",
         "mobile"
-    ]
+    ],
+    "typescript.tsdk": "node_modules\\typescript\\lib"
 }

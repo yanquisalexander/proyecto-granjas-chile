@@ -4,9 +4,9 @@
     "description": "Proyecto de granjas en Chile",
     "private": true,
     "workspaces": [
-        "backend",
-        "frontend",
-        "mobile"
+        "backend/*",
+        "frontend/*",
+        "mobile/*"
     ],
     "scripts": {
         "run-backend": "yarn workspace backend dev",
