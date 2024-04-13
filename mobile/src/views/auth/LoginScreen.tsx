@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { Dimensions, StyleSheet } from "react-native";
-import { Div, Text, Image, Input, Button, Checkbox } from "react-native-magnus";
+import { ActivityIndicator, Alert, Dimensions, StyleSheet } from "react-native";
+import { Div, Text, Image, Input, Button, Checkbox, Overlay } from "react-native-magnus";
 // @ts-expect-error - no type definitions available for assets
 import LoginImage from "@/assets/images/login.png";
 import { Constants } from "@/constants";
@@ -25,6 +25,7 @@ const LoginScreen = () => {
     const [loginIn, setLoginIn] = useState(false)
     const [showPassword, setShowPassword] = useState(false)
     const { login } = useAuth();
+    const [error, setError] = useState("");
 
     // Function to check if LOGO_PATH is a valid URL
     const isValidUrl = (url: string) => {
@@ -37,6 +38,15 @@ const LoginScreen = () => {
     };
 
     const handleLogin = async () => {
+        if (!email) {
+            Alert.alert("Error", "El correo electrónico es requerido")
+            return
+        }
+        if (!password) {
+            Alert.alert("Error", "La contraseña es requerida")
+            return
+        }
+
         setLoginIn(true)
         try {
             await login(email, password)
@@ -93,6 +103,10 @@ const LoginScreen = () => {
                     Iniciar sesión
                 </Button>
             </Div>
+            <Overlay visible={loginIn} p="xl">
+                <ActivityIndicator size="large" color="#0000ff" />
+                <Text fontSize="xl" textAlign="center">Iniciando sesión...</Text>
+            </Overlay>
         </Div>
     );
 };

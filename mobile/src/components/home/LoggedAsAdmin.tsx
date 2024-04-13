@@ -6,7 +6,7 @@ import { Feather } from "@expo/vector-icons";
 
 const LoggedAsAdmin = () => {
     const { authState } = useAuth();
-    const adminRoles = ["admin"];
+    const adminRoles = ["admin", "super_admin"];
 
     return (
         authState && authState.user && authState.user.roles && authState.user.roles.some((role: { name: string; }) => adminRoles.includes(role.name)) ? (

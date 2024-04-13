@@ -16,7 +16,7 @@ export const NoEnterpriseAsigned = () => {
                 Por favor, contacte al administrador del sistema.
             </Text>
 
-            <Button mt={16} bg="blue500" fontSize={12} p={8} onPress={() => {
+            <Button mt={16} bg="blue500" fontSize={12} p={8} loading={authState.loadingUser} onPress={() => {
                 reloadUser()
             }}
                 prefix={
