@@ -10,6 +10,10 @@ export class AccountsController {
   async login (req: Request, res: Response): Promise<void> {
     try {
       const { email, password } = req.body
+      if(!email || !password) {
+        res.status(400).json({ message: 'Email and password are required' })
+        return
+      }
       const { webpanel } = req.query
       const user = await User.findByEmail(email)
 
