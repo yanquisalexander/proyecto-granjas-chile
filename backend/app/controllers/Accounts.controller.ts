@@ -15,7 +15,7 @@ export class AccountsController {
         return
       }
       const { webpanel } = req.query
-      const user = await User.findByEmail(email)
+      const user = await User.findByEmail(email.toLowerCase())
 
       if (user && (await Authenticator.comparePassword(password, user.password))) {
         const expiresIn = '1hr'
