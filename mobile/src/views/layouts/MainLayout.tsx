@@ -2,6 +2,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import HomeScreen from "@/views/HomeScreen";
 import Feather from "@expo/vector-icons/Feather";
 import LoggedAsAdmin from "@/components/home/LoggedAsAdmin";
+import SettingsScreen from "../SettingsScreen";
 
 const Tab = createBottomTabNavigator();
 
@@ -9,9 +10,12 @@ export const MainLayout = () => {
     return (
         <>
             <LoggedAsAdmin />
-            <Tab.Navigator screenOptions={{
-                headerShown: false,
-            }}>
+            <Tab.Navigator
+
+                screenOptions={{
+                    headerShown: false,
+                    lazy: false
+                }}>
                 <Tab.Screen name="Home" component={HomeScreen} options={{
                     title: "Formularios",
                     tabBarIcon: ({ color }) => (
@@ -28,7 +32,7 @@ export const MainLayout = () => {
                 }}
                 />
 
-                <Tab.Screen name="Settings" component={HomeScreen} options={{
+                <Tab.Screen name="Settings" component={SettingsScreen} options={{
                     title: "Configuración",
                     tabBarIcon: ({ color }) => (
                         <Feather name="settings" size={24} color={color} />

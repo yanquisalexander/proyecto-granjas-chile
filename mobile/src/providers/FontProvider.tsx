@@ -2,13 +2,15 @@ import { useCallback, useEffect } from 'react';
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
 import { View } from "react-native";
-import { Inter_400Regular } from "@expo-google-fonts/inter";
+import { Inter_400Regular, Inter_500Medium, Inter_600SemiBold } from "@expo-google-fonts/inter";
 
 SplashScreen.preventAutoHideAsync();
 
 export const FontProvider = ({ children }: any) => {
     const [fontsLoaded, fontError] = useFonts({
-        Inter_400Regular
+        Inter_400Regular,
+        Inter_500Medium,
+        Inter_600SemiBold,
     })
 
     useEffect(() => {

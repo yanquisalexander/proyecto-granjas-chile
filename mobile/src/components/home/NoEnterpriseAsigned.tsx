@@ -8,15 +8,15 @@ import { Button, Div, Icon, Text } from "react-native-magnus";
 export const NoEnterpriseAsigned = () => {
     const { authState, reloadUser } = useAuth();
     return (
-        <Div bg="blue100" p={8} rounded="md">
-            <Text>
-                El usuario <Text fontWeight="bold">{authState.user.username} ({authState?.user?.email}</Text>) no tiene una empresa asignada.
+        <Div bg="orange100" p={8} rounded="md">
+            <Text color="orange600">
+                El usuario <Text color="orange600" fontWeight="bold">{authState.user.username} ({authState?.user?.email}</Text>) no tiene una empresa asignada.
             </Text>
-            <Text>
+            <Text color="orange600">
                 Por favor, contacte al administrador del sistema.
             </Text>
 
-            <Button mt={16} bg="blue500" fontSize={12} p={8} loading={authState.loadingUser} onPress={() => {
+            <Button mt={16} bg="orange600" fontSize={12} p={8} loading={authState.loadingUser} onPress={() => {
                 reloadUser()
             }}
                 prefix={

@@ -3,6 +3,8 @@ import axios, { AxiosError } from "axios";
 import * as SecureStore from "expo-secure-store";
 import { Constants } from "@/constants";
 import { Alert } from "react-native";
+import { useSettings } from "./SettingsProvider";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 const { BACKEND_URL } = Constants;
 
 interface AuthState {
@@ -62,6 +64,7 @@ export const AuthProvider = ({ children }: any) => {
     const getCurrentUser = async (token: string) => {
         const response = await axios.get(`${BACKEND_URL}/accounts/current_user`, {
             headers: { Authorization: `Bearer ${token}` },
+            timeout: 5000,
         });
         return response.data;
     };
@@ -96,6 +99,7 @@ export const AuthProvider = ({ children }: any) => {
 
     const logout = async () => {
         try {
+            await AsyncStorage.removeItem('settings');
             await SecureStore.deleteItemAsync("token");
             setAuthState({ token: null, authenticated: false, user: null, loadingUser: false });
         } catch (error) {

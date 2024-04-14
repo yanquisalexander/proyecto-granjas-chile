@@ -9,25 +9,30 @@ import {
   SafeAreaView,
 } from 'react-native-safe-area-context';
 import { FontProvider } from "@/providers/FontProvider";
+import { SettingsProvider } from "@/providers/SettingsProvider";
+import { Theme } from "@/theme";
+
 
 export default function App() {
   return (
     <SafeAreaView style={styles.container}>
-      <FontProvider>
-        <AuthProvider>
-          <NavigationContainer
-            onReady={() => console.log('App is ready!')}>
-            <StackNavigator />
-          </NavigationContainer>
-        </AuthProvider>
-      </FontProvider>
+      <SettingsProvider>
+        <FontProvider>
+          <AuthProvider>
+            <NavigationContainer
+              onReady={() => console.log('App is ready!')}>
+              <StackNavigator />
+            </NavigationContainer>
+          </AuthProvider>
+        </FontProvider>
+      </SettingsProvider>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#fff',
+    backgroundColor: Theme.BACKGROUND_COLOR,
     flex: 1,
   },
 });

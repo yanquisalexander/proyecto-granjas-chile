@@ -3,24 +3,26 @@
     "name": "Granjas Chile",
     "slug": "proyecto-granjas-chile",
     "version": "1.0.0",
+    "owner": "yanquisalexander",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#f2f2f2"
     },
     "assetBundlePatterns": [
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.yanquisalexander.proyectogranjaschile"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#f2f2f2"
       }
     },
     "web": {
@@ -29,6 +31,11 @@
     "plugins": [
       "expo-secure-store",
       "expo-font"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "3eea04f5-c590-4197-bbea-b8fa768a6357"
+      }
+    }
   }
 }

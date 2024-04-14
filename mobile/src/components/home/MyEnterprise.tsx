@@ -11,7 +11,7 @@ import { JSONText } from "../JSONText";
 export const MyEnterprise = () => {
     const { authState, reloadUser } = useAuth();
     return (
-        <Div bg="blue100" p={8} rounded="md">
+        <Div bg="blue200" p={8} rounded="md">
             <Text>
                 Hola, <Text fontWeight="bold">{authState.user.username} ({authState?.user?.email})</Text> <Emote size={20} value={Emotes.WAVING_HAND} />
             </Text>

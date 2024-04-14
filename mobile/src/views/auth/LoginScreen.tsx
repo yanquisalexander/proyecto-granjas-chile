@@ -1,15 +1,16 @@
 import React, { useState } from "react";
 import { ActivityIndicator, Alert, Dimensions, StyleSheet } from "react-native";
-import { Div, Text, Image, Input, Button, Checkbox, Overlay } from "react-native-magnus";
+import { Div, Text, Image, Input, Button, Checkbox, Overlay, ScrollDiv } from "react-native-magnus";
 // @ts-expect-error - no type definitions available for assets
 import LoginImage from "@/assets/images/login.png";
 import { Constants } from "@/constants";
 import { useAuth } from "@/providers/AuthContext";
+import { Theme } from "@/theme";
 
 // Define styles
 const styles = StyleSheet.create({
     container: {
-        backgroundColor: "#fff",
+        backgroundColor: Theme.BACKGROUND_COLOR,
         flex: 1,
         justifyContent: "center",
         alignItems: "center",
@@ -60,7 +61,7 @@ const LoginScreen = () => {
     const imageSource = LOGO_PATH && isValidUrl(LOGO_PATH) ? { uri: LOGO_PATH } : LoginImage;
 
     return (
-        <Div style={styles.container}>
+        <ScrollDiv contentContainerStyle={styles.container}>
             <Text fontSize="2xl" fontFamily="Inter_400Regular">
                 {APPLICATION_NAME}
             </Text>
@@ -79,6 +80,7 @@ const LoginScreen = () => {
 
             <Div style={{ width: "80%", gap: 16 }}>
                 <Input
+                    keyboardType="email-address"
                     placeholder="E-mail"
                     onChangeText={(email) => {
                         setEmail(email)
@@ -92,14 +94,17 @@ const LoginScreen = () => {
                 />
 
                 <Checkbox onChecked={(checked) => {
-                    console.log(checked)
                     setShowPassword(checked)
                 }}
                 >
                     <Text>Mostrar contraseña</Text>
                 </Checkbox>
 
-                <Button bg="green300" fontFamily="Inter_400Regular" color="green900" loading={loginIn} onPress={handleLogin}>
+                <Button bg="green100"
+                    fontFamily="Inter_600SemiBold"
+                    color="green500"
+                    loading={loginIn}
+                    onPress={handleLogin}>
                     Iniciar sesión
                 </Button>
             </Div>
@@ -107,7 +112,7 @@ const LoginScreen = () => {
                 <ActivityIndicator size="large" color="#0000ff" />
                 <Text fontSize="xl" textAlign="center">Iniciando sesión...</Text>
             </Overlay>
-        </Div>
+        </ScrollDiv>
     );
 };
 

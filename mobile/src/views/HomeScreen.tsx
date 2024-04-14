@@ -9,11 +9,12 @@ import { Emote } from "@/components/Emote";
 import { NoEnterpriseAsigned } from "@/components/home/NoEnterpriseAsigned";
 import { MyEnterprise } from "@/components/home/MyEnterprise";
 import LoggedAsAdmin from "@/components/home/LoggedAsAdmin";
+import { Theme } from "@/theme";
 
 
 const styles = StyleSheet.create({
     container: {
-        backgroundColor: "#fff",
+        backgroundColor: Theme.BACKGROUND_COLOR,
         flex: 1,
     },
 });
@@ -22,7 +23,7 @@ const HomeScreen = () => {
     const { authState } = useAuth();
     const navigation = useNavigation();
     return (
-        <View style={styles.container}>
+        <Div style={styles.container}>
             <Text fontSize="2xl" fontWeight="bold" py={16} px={16}>
                 Formularios a completar <Emote value={Emotes.TRACTOR} />
             </Text>
@@ -40,7 +41,7 @@ const HomeScreen = () => {
                     }
                 </Div>
             </ScrollDiv>
-        </View>
+        </Div>
     );
 }
 
