@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express'
-import { Loggers } from '../services/loggers'
+import { Loggers } from '@/app/services/loggers'
 
 const PARAMS_TO_FILTER = [
   'password',
