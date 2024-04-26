@@ -3,9 +3,12 @@ import User from '@/app/models/User.model'
 import { UUID } from 'crypto'
 import Enterprise from '@/app/models/Enterprise.model'
 import Form from './Form.model'
+import { dbService } from "../services/Database"
+import { WorkGroupMembersTable } from "@/db/schema"
+import { eq } from "drizzle-orm"
 
 interface WorkGroupAttributes {
-  id: UUID
+  id: string
   name: string
   description?: string
   users?: User[]
@@ -15,7 +18,7 @@ interface WorkGroupAttributes {
 }
 
 class WorkGroup {
-  id: UUID
+  id: string
   name: string
   description?: string
   users?: User[]
@@ -38,7 +41,7 @@ class WorkGroup {
     return workGroups.rows
   }
 
-  static async findById (id: UUID): Promise<WorkGroup | null> {
+  static async findById (id: string): Promise<WorkGroup | null> {
     const workGroup = await Database.query('SELECT * FROM work_groups WHERE id = $1', [id])
     if (workGroup.rows.length === 0) {
       return null
@@ -46,9 +49,45 @@ class WorkGroup {
     return new WorkGroup(workGroup.rows[0])
   }
 
-  static async findByUserId (user: User): Promise<WorkGroup[]> {
-    const workGroups = await Database.query('SELECT * FROM work_groups WHERE id IN (SELECT work_group_id FROM work_group_users WHERE user_id = $1)', [user.id])
-    return workGroups.rows
+  static async findByUserId(user: User): Promise<WorkGroup[]> {
+    try {
+      const workGroupMembers = await dbService.query.WorkGroupMembersTable.findMany({
+        where: eq(WorkGroupMembersTable.user_id, user.id),
+        with: {
+          
+          workGroup: {
+            with: {
+              
+              enterprise: true
+            },
+            columns: {
+              enterprise_id: false,
+              description: false,
+              created_at: false,
+              updated_at: false,
+              deleted_at: false
+            }
+          }
+        }
+      });
+
+      const workGroups = workGroupMembers.map(workGroupMember => {
+        if(!workGroupMember.workGroup) return
+        return new WorkGroup({
+          id: workGroupMember.workGroup.id,
+          name: workGroupMember.workGroup.name,
+          enterprise: new Enterprise({
+            id: workGroupMember.workGroup.enterprise.id,
+            name: workGroupMember.workGroup.enterprise.name
+          })
+        });
+      });
+
+      return workGroups.filter(workGroup => workGroup !== undefined) as WorkGroup[];
+    } catch (error) {
+      console.error("Error in findByUserId method:", error);
+      return []; // Return empty array in case of error
+    }
   }
 
   async create (): Promise<void> {

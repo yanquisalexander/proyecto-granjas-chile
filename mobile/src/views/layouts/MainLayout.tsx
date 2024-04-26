@@ -3,10 +3,12 @@ import HomeScreen from "@/views/HomeScreen";
 import Feather from "@expo/vector-icons/Feather";
 import LoggedAsAdmin from "@/components/home/LoggedAsAdmin";
 import SettingsScreen from "../SettingsScreen";
+import { useAuth } from "@/providers/AuthContext";
 
 const Tab = createBottomTabNavigator();
 
 export const MainLayout = () => {
+    const { authState } = useAuth();
     return (
         <>
             <LoggedAsAdmin />
@@ -26,6 +28,7 @@ export const MainLayout = () => {
 
                 <Tab.Screen name="Notifications" component={HomeScreen} options={{
                     title: "Notificaciones",
+                    tabBarBadge: authState.user.roles?.length || undefined,
                     tabBarIcon: ({ color }) => (
                         <Feather name="bell" size={24} color={color} />
                     )

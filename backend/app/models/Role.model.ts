@@ -1,5 +1,8 @@
 import Database from '@/lib/DatabaseManager'
 import User from './User.model'
+import { dbService } from "../services/Database"
+import { and, eq, inArray } from "drizzle-orm"
+import { UserRolesTable } from "@/db/schema"
 
 export enum Roles {
   SYSTEM = 'system',
@@ -8,16 +11,16 @@ export enum Roles {
 }
 
 export interface RoleAttributes {
-  id: string
+  id: number
   name: string
-  scopes?: string[]
+  scopes?: string[] | null
   created_at?: Date
 }
 
 class Role {
-  id: string
+  id: number
   name: string
-  scopes?: string[]
+  scopes?: string[] | null
   created_at?: Date
 
   constructor ({ id, name, scopes, created_at }: RoleAttributes) {
@@ -68,14 +71,44 @@ class Role {
     return new Role(role.rows[0])
   }
 
-  static async hasRole (user: User, roles: Roles[]): Promise<boolean> {
-    const result = await Database.query('SELECT roles.name FROM user_roles INNER JOIN roles ON user_roles.role_id = roles.id WHERE user_roles.user_id = $1', [user.id])
-    return roles.some(role => result.rows.some(row => row.name === role))
+  static async hasRole(user: User, roles: Role[]): Promise<boolean> {    
+    try {
+      const result = await dbService.query.UserRolesTable.findMany({
+        where: and(
+          eq(UserRolesTable.user_id, user.id),
+          inArray(UserRolesTable.role_id, roles.map(role => role.id))
+        )
+      });
+
+      return result.length > 0;
+    } catch (error) {
+      console.error("Error in hasRole method:", error);
+      return false; // Return false in case of error
+    }
   }
 
-  static async getRoles (user: User): Promise<Role[]> {
-    const result = await Database.query('SELECT * FROM user_roles INNER JOIN roles ON user_roles.role_id = roles.id WHERE user_roles.user_id = $1', [user.id])
-    return result.rows.map(row => new Role(row))
+  static async getRoles(user: User): Promise<Role[]> {
+    try {
+      const roles = await dbService.query.UserRolesTable.findMany({
+        where: eq(UserRolesTable.user_id, user.id),
+        with: {
+          role: true
+        }
+      });
+
+      return roles.map(userRole => {
+        return new Role({
+          id: userRole.role.id,
+          name: userRole.role.name,
+          scopes: userRole.role.scopes,
+          created_at: userRole.role.created_at
+        });
+      
+      });
+    } catch (error) {
+      console.error("Error in getRoles method:", error);
+      return []; // Return empty array in case of error
+    }
   }
 
   static async addRole (user: User, role: Roles): Promise<void> {
@@ -84,6 +117,13 @@ class Role {
 
   static async removeRole (user: User, role: Roles): Promise<void> {
     await Database.query('DELETE FROM user_roles WHERE user_id = $1 AND role_id = (SELECT id FROM roles WHERE name = $2)', [user.id, role])
+  }
+
+  static async createInitialRoles (): Promise<void> {
+    const roles = Object.values(Roles)
+    for (const role of roles) {
+      await Database.query('INSERT INTO roles (name) VALUES ($1)', [role])
+    }
   }
 }
 

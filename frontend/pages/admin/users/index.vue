@@ -1,5 +1,5 @@
 <template>
-    <div class="bg-white p-2 px-4 rounded-md">
+    <PageContainer>
         <header class="flex my-4">
             <h1 class="text-xl font-medium">
                 Usuarios
@@ -44,7 +44,7 @@
                 </div>
             </template>
         </div>
-    </div>
+    </PageContainer>
 </template>
 
 <script lang="ts" setup>

@@ -7,7 +7,7 @@ import { Loggers } from '@/app/services/loggers'
 const { Pool } = pg
 
 class Database {
-  private static pool: pg.Pool | null = null
+  public static pool: pg.Pool
 
   private constructor () {
     // Private constructor to prevent instantiation
@@ -24,34 +24,33 @@ class Database {
         connectionTimeoutMillis: 5000
       })
 
-      Database.pool.on('error', (err: any) => {
+      this.pool.on('error', (err: any) => {
         console.error('Unexpected error on idle client', err)
         Loggers.Database.writeLog(err.message)
       })
 
-      Database.pool.on('remove', () => {
+      this.pool.on('remove', () => {
         console.log(chalk.green('[DATABASE MANAGER]'), chalk.yellow('Cliente desconectado'))
         Loggers.Database.writeLog('Cliente desconectado')
       })
 
-      Database.pool.on('connect', () => {
+      this.pool.on('connect', () => {
         console.log(chalk.green('[DATABASE MANAGER]'), chalk.yellow('Conectado a la base de datos'))
         Loggers.Database.writeLog('Conectado a la base de datos')
       })
     }
   }
 
-  static async connect (): Promise<void> {
-    Database.initializePool()
+  static connect (): void {
 
     if (!Database.pool) {
-      const message = 'Database pool not initialized'
-      Loggers.Database.writeLog(message)
-      throw new Error(message)
+      Database.initializePool()
     }
 
     try {
-      await Database.pool.connect()
+      Database.pool.connect()
+      console.log(chalk.green('[DATABASE MANAGER]'), chalk.yellow('Connected to database'))
+      Loggers.Database.writeLog('Connected to database')
     } catch (error) {
       Configuration.IS_PRODUCTION ? console.error(chalk.red('[DATABASE MANAGER]'), 'An error occurred while connecting to the database. Check the logs for more details') : console.error(chalk.red('[DATABASE MANAGER]'), error)
       Loggers.Database.writeLog((error as Error).message)

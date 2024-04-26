@@ -14,5 +14,6 @@ export const createAdminEnterprisesRouter = (): Router => {
   router.delete('/:id', Authenticator.requiredRoleMiddleware([Roles.SUPER_ADMIN]), adminEnterprisesController.deleteEnterprise)
   router.put('/:id', Authenticator.hasSomeRolesMiddleware([Roles.SUPER_ADMIN, Roles.ADMIN]), adminEnterprisesController.updateEnterprise)
   router.get('/:id', adminEnterprisesController.getEnterprise)
+  router.post('/:id/admins', Authenticator.requiredRoleMiddleware([Roles.SUPER_ADMIN]), adminEnterprisesController.addAdminToEnterprise)
   return router
 }

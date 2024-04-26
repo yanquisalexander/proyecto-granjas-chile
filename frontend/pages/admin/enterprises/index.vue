@@ -1,22 +1,21 @@
 <template>
-    <div class="bg-white p-2 px-4 rounded-md">
-        <header class="flex my-4">
-            <h1 class="text-xl font-medium">Empresas / PyMES</h1>
-            <div class="flex-1"></div>
+    <PageContainer>
+        <SectionHeader title="Empresas / PyMES">
             <UButton @click="showCreateEnterpriseDialog">Crear Empresa</UButton>
-        </header>
+        </SectionHeader>
 
         <template v-if="enterprises">
 
-            <UTable :rows="enterprises" v-if="enterprises.length > 0" :columns="columns">
+            <UTable v-if="enterprises.length > 0" :rows="enterprises" :columns="columns">
                 <template #company_logo-data="{ row }">
                     <div class="flex items-center space-x-2">
-                        <UTooltip text="No hay administradores asignados" v-if="row.admins.length === 0">
+                        <UTooltip v-if="row.admins.length === 0" text="No hay administradores asignados">
                             <UButton color="orange" disabled>
                                 <UIcon name="i-tabler-alert-triangle" />
                             </UButton>
                         </UTooltip>
-                        <img :src="row.company_logo" :alt="`Logo de ${row.name}`" class="h-8 w-8 object-cover" />
+                        <img :src="`${Configuration.BACKEND_URL}${row.company_logo}`" :alt="`Logo de ${row.name}`"
+                            class="h-8 w-8 object-cover">
                     </div>
                 </template>
 
@@ -76,7 +75,7 @@
                             <UButton type="button" color="blue" variant="ghost" @click="showCreateEnterprise = false">
                                 Cancel
                             </UButton>
-                            <UButton type="button" color="blue" @click="createEnterprise" :loading="creatingEnterprise">
+                            <UButton type="button" color="blue" :loading="creatingEnterprise" @click="createEnterprise">
                                 <UIcon name="i-tabler-building" />
                                 Crear
                             </UButton>
@@ -96,8 +95,8 @@
 
                     <p class="p-4">
                         ¿Estás seguro que deseas eliminar la empresa <strong>{{ enterprises.find((enterprise) =>
-                enterprise.id ===
-                selectedEnterprise?.id)?.name }}</strong>?
+                            enterprise.id ===
+                            selectedEnterprise?.id)?.name }}</strong>?
                         Introduce el nombre de la empresa para confirmar la eliminación.
                     </p>
 
@@ -109,8 +108,9 @@
                             <UButton type="button" color="blue" variant="ghost" @click="showDeleteEnterprise = false">
                                 Cancel
                             </UButton>
-                            <UButton type="button" color="blue" @click="deleteEnterprise" :loading="deletingEnterprise"
-                                :disabled="selectedEnterprise?.name !== enterprises.find((enterprise) => enterprise.id === selectedEnterprise?.id)?.name">
+                            <UButton type="button" color="blue" :loading="deletingEnterprise"
+                                :disabled="selectedEnterprise?.name !== enterprises.find((enterprise) => enterprise.id === selectedEnterprise?.id)?.name"
+                                @click="removeEnterprise">
                                 <UIcon name="i-tabler-trash" />
                                 Eliminar
                             </UButton>
@@ -119,13 +119,14 @@
                 </UCard>
             </UModal>
         </template>
-    </div>
+    </PageContainer>
 </template>
 
 <script setup lang="ts">
 import { Configuration } from "~/config";
 import { type Enterprise } from "~/types";
 
+const { getEnterprises, deleteEnterprise } = useEnterprises()
 
 const { token } = useAuth()
 const toast = useToast()
@@ -183,36 +184,19 @@ const showDeleteEnterpriseDialog = (id: string) => {
     showDeleteEnterprise.value = true
 }
 
-const deleteEnterprise = async () => {
+const removeEnterprise = async () => {
     deletingEnterprise.value = true
-    if (!token.value) return
     try {
-        const response = await fetch(`${Configuration.BACKEND_URL}/admin/enterprises/${selectedEnterprise.value?.id}`, {
-            method: 'DELETE',
-            headers: {
-                'Authorization': token.value
-            }
+        await deleteEnterprise(selectedEnterprise.value?.id)
+        toast.add({
+            title: 'Empresa eliminada',
+            description: 'La empresa ha sido eliminada exitosamente',
+            color: "green",
+            icon: "i-tabler-building"
         })
 
-        if (response.ok) {
-            toast.add({
-                title: 'Empresa eliminada',
-                description: 'La empresa ha sido eliminada exitosamente',
-                color: "green",
-                icon: "i-tabler-building"
-            })
-        } else {
-            const res = await response.json()
-            toast.add({
-                title: 'Error al eliminar empresa',
-                description: res.message,
-                color: "red",
-                icon: "i-tabler-building"
-            })
-        }
-
         showDeleteEnterprise.value = false
-        await fetchEnterprises()
+        enterprises.value = await getEnterprises()
     } catch (error) {
         console.error(error)
         toast.add({
@@ -263,7 +247,7 @@ const createEnterprise = async () => {
         showCreateEnterprise.value = false
 
 
-        await fetchEnterprises()
+        enterprises.value = await getEnterprises()
     } catch (error) {
         console.error(error)
         toast.add({
@@ -277,22 +261,9 @@ const createEnterprise = async () => {
     }
 }
 
-const fetchEnterprises = async () => {
-    if (!token.value) return
-    try {
-        const res = await fetch(`${Configuration.BACKEND_URL}/admin/enterprises`, {
-            headers: {
-                'Authorization': token.value
-            }
-        })
-        const data = await res.json()
-        enterprises.value = data
-    } catch (error) {
-        console.error(error)
-    }
-}
 
-await fetchEnterprises()
+
+enterprises.value = await getEnterprises()
 /*  {
     "id": "2f9f321a-5a91-4cec-a3d0-f04b46c47ab6",
     "name": "New Enterprise",

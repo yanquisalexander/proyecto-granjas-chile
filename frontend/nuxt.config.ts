@@ -10,7 +10,7 @@ export default defineNuxtConfig({
     '@nuxt/eslint',
   ],
   experimental: {
-    viewTransition: true,
+    viewTransition: false,
   },
   ui: {
     icons: ['tabler', 'fluent']
@@ -24,7 +24,7 @@ export default defineNuxtConfig({
     provider: {
       type: 'local',
       endpoints: {
-        signIn: { path: '/accounts/login?webpanel=true', method: 'post' },
+        signIn: { path: '/accounts/admin-login', method: 'post' },
         getSession: { path: '/accounts/current_user', method: 'get' },
         signOut: { path: '/accounts/logout', method: 'post' },
       },
@@ -37,6 +37,8 @@ export default defineNuxtConfig({
       },
       sessionDataType: {
         id: 'string',
+        username: 'string',
+        full_name: 'string',
         email: 'string',
         roles: 'array',
       }

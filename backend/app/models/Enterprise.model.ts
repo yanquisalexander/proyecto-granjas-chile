@@ -3,23 +3,28 @@ import { UUID } from 'crypto'
 import WorkGroup from './WorkGroup.model'
 import { Roles } from "./Role.model"
 import User from "./User.model"
+import { dbService } from "../services/Database"
+import { UserRolesTable, UsersTable } from "@/db/schema"
+import { and, eq, inArray } from "drizzle-orm"
 
 export interface EnterpriseAttributes {
-  id: UUID
+  id: string
   name: string
-  description?: string
-  company_logo?: string
+  description?: string | null
+  company_logo?: string | null
   created_at?: Date
   updated_at?: Date
+  deleted_at?: Date
 }
 
 class Enterprise {
-  id: UUID
+  id: string
   name: string
-  description?: string
-  company_logo?: string
+  description?: string | null
+  company_logo?: string | null
   created_at?: Date
   updated_at?: Date
+  deleted_at?: Date
 
   constructor (attributes: EnterpriseAttributes) {
     this.id = attributes.id
@@ -28,6 +33,7 @@ class Enterprise {
     this.company_logo = attributes.company_logo
     this.created_at = attributes.created_at
     this.updated_at = attributes.updated_at
+    this.deleted_at = attributes.deleted_at
   }
 
   static async getAll (): Promise<Enterprise[]> {
@@ -52,8 +58,14 @@ class Enterprise {
     await Database.query('UPDATE enterprises SET name = $1, description = $2, company_logo = $3 WHERE id = $4', [this.name, this.description, this.company_logo, this.id])
   }
 
+
+
   async delete (): Promise<void> {
-    await Database.query('DELETE FROM enterprises WHERE id = $1', [this.id])
+    await Database.query('UPDATE enterprises SET deleted_at = NOW() WHERE id = $1', [this.id])
+  }
+
+  async restore (): Promise<void> {
+    await Database.query('UPDATE enterprises SET deleted_at = NULL WHERE id = $1', [this.id])
   }
 
   async getWorkGroups (): Promise<WorkGroup[]> {
@@ -61,11 +73,20 @@ class Enterprise {
     return workGroups
   }
 
-  async getAdmins (): Promise<any[]> {
-    // join de user_roles con users (role_id)
-    // enterprise_id viene de users
+  async addAdmin (user: User): Promise<void> {
+    await user.addToEnterprise(this)
+    await user.addRole(Roles.ADMIN)
+    console.log('user added to enterprise')
+  }
 
-    const admins = await Database.query(`
+  async removeAdmin (user: User): Promise<void> {
+    await user.removeFromEnterprise()
+    await user.removeRole(Roles.ADMIN)
+  }
+
+  async getAdmins (): Promise<any[]> {
+
+ const admins = await Database.query(`
     SELECT users.id, users.username, users.email, users.enterprise_id 
 FROM users 
 JOIN user_roles ON users.id = user_roles.user_id 
@@ -73,7 +94,6 @@ WHERE user_roles.role_id = $1 AND users.enterprise_id = $2
     `, [3, this.id])
 
     return admins.rows
-
     
   }
 }

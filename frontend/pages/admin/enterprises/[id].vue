@@ -1,5 +1,5 @@
 <template>
-    <div class="bg-white p-2 px-4 rounded-md">
+    <PageContainer>
 
         <template v-if="enterprise && editedEnterprise">
             <header class="flex my-4">
@@ -34,7 +34,8 @@
                 </UFormGroup>
 
                 <UFormGroup label="Logo" name="logo">
-                    <img class="preview h-32" :src="imageToPreview || enterprise.company_logo"
+                    <img class="preview h-32"
+                        :src="imageToPreview || `${Configuration.BACKEND_URL}${enterprise.company_logo}`"
                         :alt="`Logo de ${enterprise.name}`" />
                     <UInput type="file" accept="image/*" @change="handleImageChange" />
                 </UFormGroup>
@@ -59,9 +60,14 @@
                             <NuxtLink class="text-blue-500" :to="`/users/${admin.id}`">{{ admin.username }}</NuxtLink>
                         </li>
                     </ul>
+
+                    <UButton color="blue" @click="addAdminModal = true">
+                        <UIcon name="i-tabler-user-plus" />
+                        <span>Agregar administrador</span>
+                    </UButton>
                 </UFormGroup>
                 <footer class="flex justify-end mt-4">
-                    <UButton color="blue" @click="updateEnterprise">
+                    <UButton color="blue" @click="editEnterprise">
                         Guardar cambios
                     </UButton>
                 </footer>
@@ -71,7 +77,30 @@
             <UProgress animation="carousel" color="blue" />
             <p class="text-center mt-4">Cargando...</p>
         </div>
-    </div>
+
+        <UModal v-model="addAdminModal">
+            <UCard :ui="{ ring: '', divide: 'divide-y divide-gray-100 dark:divide-gray-800' }">
+                <template #header>
+                    <h2 class="text-xl font-medium">Agregar administrador</h2>
+                </template>
+                <p>Selecciona un usuario para añadir como administrador de la empresa</p>
+                <USelectMenu searchable v-model="selectedAdminToAdd" :options="users" option-attribute="username"
+                    value-attribute="id">
+                </USelectMenu>
+
+                <UAlert v-if="enterprise?.admins?.find(admin => admin.id === selectedAdminToAdd)" color="blue"
+                    class="mt-2" variant="soft" icon="i-tabler-user-check" title="Usuario ya es administrador"
+                    description="El usuario seleccionado ya es administrador de la empresa" />
+                <template #footer>
+                    <UButton color="blue" @click="addAdminToEnterprise" :disabled="!selectedAdminToAdd">
+                        <UIcon name="i-tabler-user-plus" />
+                        <span>Agregar administrador</span>
+                    </UButton>
+                </template>
+            </UCard>
+
+        </UModal>
+    </PageContainer>
 </template>
 
 
@@ -79,63 +108,108 @@
 import { Configuration } from "~/config";
 import type { Enterprise } from "~/types";
 
-const route = useRoute()
-const { token } = useAuth()
-const toast = useToast()
+const { updateEnterprise, getEnterprise } = useEnterprises();
+const { token } = useAuth();
+const route = useRoute();
+const toast = useToast();
 
-const imageToPreview = ref<string | null>(null)
-const enterprise = ref<Enterprise | null>(null)
-const editedEnterprise = ref<Enterprise | null>(null)
+const imageToPreview = ref<string | null>(null);
+const enterprise = ref<Enterprise | null>(null);
+const editedEnterprise = ref<Enterprise | null>(null);
+const addAdminModal = ref(false);
+const users = ref<User[]>([]);
+const selectedAdminToAdd = ref<string | null>(null);
+
+watch(addAdminModal, async (value) => {
+    if (value) await fetchUsers();
+});
+
+const fetchUsers = async () => {
+    if (!token.value) return;
+    const response = await fetch(`${Configuration.BACKEND_URL}/admin/users`, {
+        headers: {
+            'Authorization': token.value
+        }
+    });
+    users.value = await response.json();
+};
+
+const addAdminToEnterprise = async () => {
+    if (!selectedAdminToAdd.value || !enterprise.value || !token.value) return;
+
+    const response = await fetch(`${Configuration.BACKEND_URL}/admin/enterprises/${enterprise.value.id}/admins`, {
+        method: 'POST',
+        headers: {
+            'Authorization': token.value,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            user_id: selectedAdminToAdd.value
+        })
+    });
+
+    if (!response.ok) {
+        toast.add({
+            title: 'Error al agregar administrador',
+            description: 'Ocurrió un error al agregar el administrador a la empresa. Por favor, intenta de nuevo.',
+            color: "red",
+            icon: "i-tabler-alert-triangle"
+        });
+        return;
+    }
+
+    toast.add({
+        title: 'Administrador agregado',
+        description: 'El usuario ha sido añadido como administrador de la empresa',
+        color: "green",
+        icon: "i-tabler-check"
+    });
+    await fetchEnterprise();
+};
 
 const copyEnterpriseIdToClipboard = () => {
-    if (!enterprise.value) return
-    navigator.clipboard.writeText(enterprise.value.id)
+    if (!enterprise.value) return;
+    navigator.clipboard.writeText(enterprise.value.id);
     toast.add({
         title: 'ID de empresa copiado',
         description: 'El ID de la empresa ha sido copiado al portapapeles',
         color: "green",
         icon: "i-tabler-check"
-    })
-}
+    });
+};
 
-const handleImageChange = (event: Event) => {
-    const target = event.target as HTMLInputElement
-    const file = target.files?.[0]
-    if (!file) return
-    if (!editedEnterprise.value) return
-    editedEnterprise.value.company_logo = file as any
-    const reader = new FileReader()
+const handleImageChange = (files: FileList | null) => {
+    if (!files || !files.length) return;
+    const file = files[0];
+
+    editedEnterprise.value.company_logo = file;
+    const reader = new FileReader();
     reader.onload = (e) => {
-        imageToPreview.value = e.target?.result as string
-    }
+        imageToPreview.value = e.target?.result as string;
+    };
 
-    reader.readAsDataURL(file)
-}
+    reader.readAsDataURL(file);
+
+};
 
 const fetchEnterprise = async () => {
-    const { id } = route.params
-    console.log(id)
-    if (!token.value) return
-    const response = await fetch(`${Configuration.BACKEND_URL}/admin/enterprises/${id}`, {
-        headers: {
-            'Authorization': token.value
-        }
-    })
-    const data = await response.json()
-    enterprise.value = data
-    editedEnterprise.value = { ...data }
-}
+    const { id } = route.params;
 
-const updateEnterprise = async () => {
-    const { id } = route.params
-    const formData = new FormData()
-    if (!editedEnterprise.value || !enterprise.value) return
+
+    enterprise.value = await getEnterprise(id.toString());
+    editedEnterprise.value = { ...enterprise.value };
+};
+
+const editEnterprise = async () => {
+    const { id } = route.params;
+    if (!editedEnterprise.value || !token.value) return;
+
+    const formData = new FormData();
     for (const key in editedEnterprise.value) {
-        if (editedEnterprise.value[key as keyof Enterprise] !== enterprise.value[key as keyof Enterprise]) {
-            formData.append(key, editedEnterprise.value[key as keyof Enterprise])
+        if (editedEnterprise.value[key] !== enterprise.value[key]) {
+            formData.append(key, editedEnterprise.value[key]);
         }
     }
-    if (!token.value) return
 
     const response = await fetch(`${Configuration.BACKEND_URL}/admin/enterprises/${id}`, {
         method: 'PUT',
@@ -143,7 +217,7 @@ const updateEnterprise = async () => {
             'Authorization': token.value
         },
         body: formData
-    })
+    });
 
     if (!response.ok) {
         toast.add({
@@ -151,21 +225,18 @@ const updateEnterprise = async () => {
             description: 'Ocurrió un error al actualizar la empresa. Por favor, intenta de nuevo.',
             color: "red",
             icon: "i-tabler-alert-triangle"
-        })
-        return
+        });
+        return;
     }
 
-    const data = await response.json()
     toast.add({
         title: 'Empresa actualizada',
         description: 'Los cambios han sido guardados',
         color: "green",
         icon: "i-tabler-check"
-    })
-    fetchEnterprise()
-}
+    });
+    await fetchEnterprise();
+};
 
-onMounted(() => {
-    fetchEnterprise()
-})
+onMounted(fetchEnterprise);
 </script>

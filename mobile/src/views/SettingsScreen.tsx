@@ -1,4 +1,5 @@
 import { Emote } from "@/components/Emote";
+import SectionHeader from "@/components/SectionHeader";
 import LoggedUserCard from "@/components/settings/LoggedUserCard";
 import SettingList from "@/components/settings/SettingList";
 import { Emotes } from "@/emotes";
@@ -20,9 +21,11 @@ const SettingsScreen = () => {
     const { logout } = useAuth();
     return (
         <Div style={styles.container}>
-            <Text fontSize="2xl" fontWeight="bold" py={16} px={16}>
-                Configuración <Emote value={Emotes.WRENCH} />
-            </Text>
+            <SectionHeader>
+                <Text fontSize="2xl" fontWeight="bold">
+                    Configuración <Emote value={Emotes.WRENCH} />
+                </Text>
+            </SectionHeader>
             <ScrollDiv style={{ paddingHorizontal: 16 }} py={8}>
                 <LoggedUserCard />
                 <Div my={4} />

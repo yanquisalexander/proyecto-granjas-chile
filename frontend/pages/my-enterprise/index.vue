@@ -1,8 +1,7 @@
 <template>
   <div>
     <div v-if="loading">
-      <UProgress animation="carousel" color="blue" />
-      <p class="text-center mt-4">Cargando...</p>
+      <LoadingData />
     </div>
     <div v-else-if="!enterprise">
       <p class="text-center mt-4">
@@ -10,16 +9,16 @@
       </p>
     </div>
     <div v-else>
-      <div class="flex flex-col space-y-6">
-        <div class="flex items-center justify-between">
-          <h1 class="text-xl font-medium">Mi Empresa</h1>
-          <div class="flex items-center space-x-2">
+      <div class="flex flex-col">
+        <SectionHeader :title="enterprise.name || 'Mi Empresa'">
+          <template #actions>
             <UButton @click="editingEnterpriseDetails = !editingEnterpriseDetails" variant="soft" color="gray"
               icon="i-tabler-edit">
               {{ editingEnterpriseDetails ? 'Cancelar' : 'Editar' }}
             </UButton>
-          </div>
-        </div>
+          </template>
+        </SectionHeader>
+
         <UFormGroup label="ID de Empresa" name="id">
           <div class="flex items-center w-full">
             <UInput v-model="enterprise.id" disabled class="flex-1" />
@@ -34,7 +33,7 @@
         </UFormGroup>
 
         <UFormGroup label="Logo" name="logo">
-          <img class="preview h-32" :src="imageToPreview || enterpriseEdited.company_logo"
+          <img class="preview h-32" :src="imageToPreview || `${Configuration.BACKEND_URL}${enterprise.company_logo}`"
             :alt="`Logo de ${enterprise.name}`" />
           <UInput type="file" accept="image/*" @change="handleImageChange" :disabled="!editingEnterpriseDetails" />
         </UFormGroup>
@@ -65,7 +64,6 @@ import { Configuration } from "~/config";
 import type { Enterprise } from "~/types";
 
 const { token } = useAuth()
-const toast = useToast()
 
 const enterprise = ref<Enterprise | null>(null)
 const enterpriseEdited = ref<Enterprise | null>(null)
@@ -73,14 +71,13 @@ const loading = ref(true)
 const editingEnterpriseDetails = ref(false)
 const imageToPreview = ref<string | null>(null)
 
+const { copy } = useClipboard()
+
 const copyEnterpriseIdToClipboard = () => {
   if (!enterprise.value) return
-  navigator.clipboard.writeText(enterprise.value.id)
-  toast.add({
+  copy(enterprise.value.id, {
     title: 'ID de empresa copiado',
     description: 'El ID de la empresa ha sido copiado al portapapeles',
-    color: "green",
-    icon: "i-tabler-check"
   })
 }
 

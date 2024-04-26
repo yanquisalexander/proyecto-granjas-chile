@@ -40,7 +40,7 @@ class FormStep {
     return new FormStep(formStep.rows[0])
   }
 
-  static async findByFormId (formId: UUID): Promise<FormStep[]> {
+  static async findByFormId (formId: string): Promise<FormStep[]> {
     const formSteps = await Database.query('SELECT * FROM form_steps WHERE form_id = $1', [formId])
     const steps = formSteps.rows.map(step => new FormStep(step))
     return steps

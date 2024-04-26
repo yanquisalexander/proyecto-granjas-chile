@@ -11,7 +11,7 @@ export type Enterprise = {
     location: string;
     company_logo: string;
     description: string;
-    createdAt: string;
-    updatedAt: string;
+    created_at: string;
+    updated_at: string;
     admins?: EnterpriseAdmin[];
 };

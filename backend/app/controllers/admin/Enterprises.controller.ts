@@ -5,7 +5,7 @@ import fs from 'fs'
 import User from '@/app/models/User.model'
 
 export class AdminEnterprisesController {
-  async getEnterprises (req: Request, res: Response, next: NextFunction): Promise<void> {
+  async getEnterprises(req: Request, res: Response, next: NextFunction): Promise<void> {
     const enterprises = await Enterprise.getAll()
 
     const enterprisesWithAdmins = await Promise.all(enterprises.map(async (enterprise) => {
@@ -15,11 +15,11 @@ export class AdminEnterprisesController {
         admins
       }
     }))
-    
+
     res.json(enterprisesWithAdmins)
   }
 
-  async createEnterprise (req: Request, res: Response, next: NextFunction): Promise<void> {
+  async createEnterprise(req: Request, res: Response, next: NextFunction): Promise<void> {
     const { name, description } = req.body
     let company_logo = "https://cdn.icon-icons.com/icons2/1863/PNG/512/business_119337.png"
     // Default logo when creating enterprise
@@ -38,7 +38,7 @@ export class AdminEnterprisesController {
     }
   }
 
-  async deleteEnterprise (req: Request, res: Response, next: NextFunction): Promise<void> {
+  async deleteEnterprise(req: Request, res: Response, next: NextFunction): Promise<void> {
     const { id } = req.params
     const enterprise = await Enterprise.findById(id as UUID)
     if (!enterprise) {
@@ -61,7 +61,7 @@ export class AdminEnterprisesController {
     }
   }
 
-  async updateEnterprise (req: Request, res: Response, next: NextFunction): Promise<void> {
+  async updateEnterprise(req: Request, res: Response, next: NextFunction): Promise<void> {
     const { id } = req.params
     const { name, description } = req.body
     const enterprise = await Enterprise.findById(id as UUID)
@@ -82,7 +82,7 @@ export class AdminEnterprisesController {
         const fileExtension = file.originalname.split('.').pop()
         const filename = `company_logo_${enterprise.id}.${fileExtension}`
 
-        const fileUrl = `http://localhost:3000/uploads/company_logos/${filename}`
+        const fileUrl = `/uploads/company_logos/${filename}`
         enterprise.company_logo = fileUrl
 
         // create file to public/uploads/company_logos
@@ -101,7 +101,7 @@ export class AdminEnterprisesController {
     }
   }
 
-  async getEnterprise (req: Request, res: Response, next: NextFunction): Promise<void> {
+  async getEnterprise(req: Request, res: Response, next: NextFunction): Promise<void> {
     const { id } = req.params
     try {
       const enterprise = await Enterprise.findById(id as UUID)
@@ -113,7 +113,7 @@ export class AdminEnterprisesController {
       }
 
       const admins = await enterprise.getAdmins()
-      
+
       res.json({
         ...enterprise,
         admins
@@ -128,7 +128,7 @@ export class AdminEnterprisesController {
     }
   }
 
-  async getMyEnterprise (req: Request, res: Response, next: NextFunction): Promise<void> {
+  async getMyEnterprise(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       // @ts-expect-error id is not in Request
       const user = await User.find(req.user.id)
@@ -149,7 +149,7 @@ export class AdminEnterprisesController {
     }
   }
 
-  async updateMyEnterprise (req: Request, res: Response, next: NextFunction): Promise<void> {
+  async updateMyEnterprise(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       // @ts-expect-error id is not in Request
       const user = await User.find(req.user.id)
@@ -174,4 +174,53 @@ export class AdminEnterprisesController {
       })
     }
   }
+
+  async addAdminToEnterprise(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { id } = req.params;
+      const { user_id } = req.body;
+  
+      const enterprise = await Enterprise.findById(id as UUID);
+      const user = await User.find(user_id);
+  
+      if (!enterprise) {
+        res.status(404).json({ message: 'Enterprise not found.' });
+        return;
+      }
+  
+      if (!user) {
+        res.status(404).json({ message: 'User not found.' });
+        return;
+      }
+  
+      const isSystemUser = await user.isSystemUser();
+      if (isSystemUser) {
+        res.status(400).json({ message: 'System user cannot be an admin of an enterprise.' });
+        return;
+      }
+  
+      const userEnterprise = await user.getEnterprise();
+      const enterpriseAdmins = await enterprise.getAdmins();
+  
+      if (userEnterprise && userEnterprise.id !== enterprise.id) {
+        res.status(400).json({ message: 'User is already an admin of another enterprise.' });
+        return;
+      }
+  
+      if (enterpriseAdmins.some(admin => admin.id === user.id)) {
+        res.status(400).json({ message: 'User is already an admin of this enterprise.' });
+        return;
+      }
+  
+      await enterprise.addAdmin(user);
+      res.json(enterprise);
+    } catch (error) {
+      res.status(500).json({
+        message: error instanceof Error ? error.message : 'Internal server error',
+        error_type: error instanceof Error ? error.name : 'Unknown'
+      });
+    }
+  }
+  
+  
 }

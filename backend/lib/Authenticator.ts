@@ -4,6 +4,7 @@ import User from '@/app/models/User.model'
 import WorkGroup from '@/app/models/WorkGroup.model'
 import { Configuration } from '@/config'
 import bcrypt from 'bcrypt'
+import jwt from 'jsonwebtoken';
 import chalk from 'chalk'
 import { Request, Response, NextFunction } from 'express'
 import { UUID } from 'node:crypto'
@@ -20,7 +21,7 @@ interface JwtPayload {
 }
 
 export interface CurrentUser {
-  id: UUID
+  id: string
   username: string
   email: string
   created_at?: Date
@@ -38,11 +39,18 @@ export class Authenticator {
   }
 
   async currentUser (): Promise<CurrentUser | null> {
+    console.log(chalk.bgCyan.bold('[AUTHENTICATOR]'), chalk.white('Getting current user...'))
     if (!this.user) return null
+    console.log(chalk.bgCyan.bold('[AUTHENTICATOR]'), chalk.white('User found:'), this.user)
+    console.log(chalk.bgCyan.bold('[AUTHENTICATOR]'), chalk.white('Getting user roles...'))
     const roles = await this.user.getRoles()
+    console.log(chalk.bgCyan.bold('[AUTHENTICATOR]'), chalk.white('Getting user workgroups...'))
     const workgroups = await this.user.getWorkGroups()
+    console.log(chalk.bgCyan.bold('[AUTHENTICATOR]'), chalk.white('Getting user enterprise...'))
     const enterprise = await this.user.getEnterprise()
-    console.log(roles)
+    console.log(chalk.bgCyan.bold('[AUTHENTICATOR]'), chalk.white('User roles:'), roles)
+    console.log(chalk.bgCyan.bold('[AUTHENTICATOR]'), chalk.white('User workgroups:'), workgroups)
+    console.log(chalk.bgCyan.bold('[AUTHENTICATOR]'), chalk.white('User enterprise:'), enterprise)
     return {
       id: this.user.id,
       username: this.user.username,
@@ -155,10 +163,20 @@ export class Authenticator {
       }
     }))
 
+    try {
+      await Role.createInitialRoles()
+    } catch (error) {
+      console.warn(chalk.bgRed.bold('[AUTHENTICATOR]'), chalk.white('Error creating initial roles. ¿Maybe they already exist?'))
+    }
+
     const usersCount = await User.count()
     console.log(chalk.bgCyan.bold('[AUTHENTICATOR]'), chalk.white('Users count:'), usersCount)
 
-    if (usersCount === 1) {
+    if (usersCount === 1 || usersCount === 0) {
+      if (usersCount === 0) {
+        console.log(chalk.bgCyan.bold('[AUTHENTICATOR]'), chalk.white('No users found. Creating system user...'))
+        await User.createSystemUser()
+      }
       console.log(chalk.bgCyan.bold('[AUTHENTICATOR]'), chalk.white('Only system user found. You should create a new user.'))
       // Require the user to create a new user before continuing
 
@@ -195,5 +213,11 @@ export class Authenticator {
         process.exit(1)
       }
     }
+  }
+
+  static jwtSign (userId: string, expiresIn?: number): string {
+    // 1 hour by default
+    if(!expiresIn) expiresIn = 60 * 60
+    return jwt.sign({ user_id: userId }, Configuration.JWT_SECRET, { expiresIn })
   }
 }

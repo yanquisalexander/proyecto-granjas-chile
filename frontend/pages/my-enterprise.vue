@@ -1,12 +1,6 @@
 <template>
-    <div class="bg-white p-4 rounded-md">
-        <header class="flex my-6">
-            <h1 class="text-xl font-medium">
-                Mi Empresa
-            </h1>
-            <div class="flex-1"></div>
-
-        </header>
+    <PageContainer>
+        <SectionHeader title="Mi Empresa" />
 
         <UTabs :items="tabs" class="w-full" @change="handleTabChange">
             <template #default="{ item, index, selected }">
@@ -24,7 +18,7 @@
         <div class="mt-6">
             <NuxtPage />
         </div>
-    </div>
+    </PageContainer>
 </template>
 
 <script setup lang="ts">

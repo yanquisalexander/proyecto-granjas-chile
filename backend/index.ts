@@ -5,7 +5,7 @@ import Database from './lib/DatabaseManager'
 
 const bootApplication = async (): Promise<void> => {
   console.log('Booting application...')
-  await Database.connect()
+  Database.connect()
   await createWebServer()
   Authenticator.initialize()
 

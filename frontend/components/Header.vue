@@ -8,13 +8,13 @@
         </div>
         <div class="flex-1"></div>
         <UPopover>
-            <UButton color="white" :label="user?.email" trailing-icon="i-heroicons-chevron-down-20-solid" />
+            <UButton color="white" :label="user?.username" trailing-icon="i-heroicons-chevron-down-20-solid" />
 
             <template #panel>
                 <div class="p-4">
                     <div class="flex items-center space-x-2">
                         <UIcon name="i-tabler-user" class="text-gray-500" />
-                        <span>{{ user?.name }}</span>
+                        <span>{{ user?.username }}</span>
                     </div>
                     <div class="flex items-center space-x-2">
                         <UIcon name="i-tabler-mail" class="text-gray-500" />
