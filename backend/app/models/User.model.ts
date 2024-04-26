@@ -9,7 +9,6 @@ import Enterprise from './Enterprise.model'
 import { dbService } from "../services/Database"
 import { eq, or } from "drizzle-orm"
 import { UsersTable } from "@/db/schema"
-import EnterpriseTable from "@/db/migrations/20240229184342_enterprise_table"
 
 export interface UserAttributes {
   id: string
