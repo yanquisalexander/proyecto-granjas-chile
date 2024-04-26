@@ -6,7 +6,7 @@
         <div class="flex items-center">
             <UHorizontalNavigation :links="filteredHeaderLinks" />
         </div>
-        <div class="flex-1"></div>
+        <div class="flex-1" />
         <UPopover>
             <UButton color="white" :label="user?.username" trailing-icon="i-heroicons-chevron-down-20-solid" />
 
