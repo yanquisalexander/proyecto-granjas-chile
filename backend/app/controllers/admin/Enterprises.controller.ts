@@ -130,7 +130,6 @@ export class AdminEnterprisesController {
 
   async getMyEnterprise(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      // @ts-expect-error id is not in Request
       const user = await User.find(req.user.id)
       const enterprise = await user?.getEnterprise()
       if (!enterprise) {
@@ -151,7 +150,6 @@ export class AdminEnterprisesController {
 
   async updateMyEnterprise(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      // @ts-expect-error id is not in Request
       const user = await User.find(req.user.id)
       const enterprise = await user?.getEnterprise()
       if (!enterprise) {
