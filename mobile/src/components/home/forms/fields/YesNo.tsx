@@ -19,7 +19,7 @@ export const YesNo = ({ field, updateFieldValue, isFormLocked, formDraft }: { fi
 
 
     return (
-        <Div mt={16} flex={1} row>
+        <Div mt={8} flex={1} row>
             <Toggle
                 on={isCheck}
                 onPress={() => handleChecked(!isCheck)}
