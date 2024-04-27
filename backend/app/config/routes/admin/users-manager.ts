@@ -10,6 +10,9 @@ export const createAdminUsersManagerRouter = (): Router => {
     // GET /admin/users (All users of the system)
     router.get('/', Authenticator.requiredRoleMiddleware([Roles.SUPER_ADMIN]), adminUsersController.getUsers)
 
+    // POST /admin/users (Create a new user)
+    router.post('/', Authenticator.requiredRoleMiddleware([Roles.SUPER_ADMIN]), adminUsersController.createUser)
+
 
     return router
 }

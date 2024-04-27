@@ -157,7 +157,7 @@ const HomeScreen = () => {
                                                     bg="blue100"
                                                     color="blue700"
                                                     onPress={() => {
-                                                        console.log('Completar')
+                                                        navigation.navigate('FormCompletion', { formId: '60031390-a2a7-40ab-b02a-26a02a4b5823' })
                                                     }}
                                                     prefix={
                                                         <Icon name="pencil" fontSize="lg" color="blue700" fontFamily="MaterialCommunityIcons" mr={8} />

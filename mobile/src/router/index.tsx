@@ -6,12 +6,12 @@ import { useAuth } from "@/providers/AuthContext";
 import LoginScreen from "@/views/auth/LoginScreen";
 import HomeScreen from "@/views/HomeScreen";
 import { MainLayout } from "@/views/layouts/MainLayout";
+import { FormCompletionScreen } from "@/views/FormCompletionScreen";
 
 const Stack = createNativeStackNavigator();
 
-
 export const StackNavigator = () => {
-    const { authState } = useAuth()
+    const { authState } = useAuth();
     return (
         <Stack.Navigator
             initialRouteName={authState?.authenticated ? "Main" : "Login"}
@@ -20,13 +20,14 @@ export const StackNavigator = () => {
                 presentation: 'modal',
                 headerShown: false,
             }}>
-            {
-                authState?.authenticated ? (
+            {authState?.authenticated ? (
+                <>
                     <Stack.Screen name="Main" component={MainLayout} />
-                ) : (
-                    <Stack.Screen name="Login" component={LoginScreen} />
-                )
-            }
+                    <Stack.Screen name="FormCompletion" component={FormCompletionScreen} />
+                </>
+            ) : (
+                <Stack.Screen name="Login" component={LoginScreen} />
+            )}
         </Stack.Navigator>
     );
 }

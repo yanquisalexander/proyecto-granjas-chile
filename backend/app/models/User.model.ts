@@ -19,7 +19,7 @@ export interface UserAttributes {
   updated_at?: Date
   roles?: Role[]
   workgroups?: WorkGroup[]
-  enterprise?: any
+  enterprise?: Enterprise | undefined
 }
 
 export interface UserDTO {
@@ -28,7 +28,7 @@ export interface UserDTO {
   email: string
   created_at?: Date
   updated_at?: Date
-  enterprise?: Enterprise
+  enterprise?: Enterprise | undefined
   roles?: Role[]
 }
 
@@ -127,7 +127,8 @@ class User {
   }
 
   async hasRole (role: Roles[]): Promise<boolean> {
-    return await Role.hasRole(this, role)
+    const roles = await this.getRoles()
+    return roles.some(r => role.includes(r.name))
   }
 
   async getRoles (): Promise<Role[]> {
@@ -136,6 +137,10 @@ class User {
 
   async isAdmin (): Promise<boolean> {
     return await this.hasRole([Roles.ADMIN])
+  }
+
+  async isSuperAdmin (): Promise<boolean> {
+    return await this.hasRole([Roles.SUPER_ADMIN])
   }
 
   async isSystemUser (): Promise<boolean> {

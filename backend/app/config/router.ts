@@ -4,6 +4,7 @@ import { createAdminEnterprisesRouter } from './routes/admin/enterprises'
 import { Authenticator } from '@/lib/Authenticator'
 import { createAccountsRouter } from './routes/accounts'
 import { createFormsRouter } from './routes/forms'
+import { createAdminDashboardRouter } from "./routes/admin/dashboard"
 
 /*
     This is the main router file. It will be used to define all core routes for the application.
@@ -25,6 +26,7 @@ router.use('/accounts', createAccountsRouter())
 
 router.use('/admin/enterprises', Authenticator.middleware, createAdminEnterprisesRouter())
 router.use('/admin/users', Authenticator.middleware, createUsersRouter())
+router.use('/admin/dashboard', Authenticator.middleware, createAdminDashboardRouter())
 
 router.use('/forms', createFormsRouter())
 

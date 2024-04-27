@@ -14,7 +14,7 @@ export interface EnterpriseAttributes {
   company_logo?: string | null
   created_at?: Date
   updated_at?: Date
-  deleted_at?: Date
+  deleted_at?: Date | null
 }
 
 class Enterprise {
@@ -24,7 +24,7 @@ class Enterprise {
   company_logo?: string | null
   created_at?: Date
   updated_at?: Date
-  deleted_at?: Date
+  deleted_at?: Date | null
 
   constructor (attributes: EnterpriseAttributes) {
     this.id = attributes.id
@@ -75,7 +75,12 @@ class Enterprise {
 
   async addAdmin (user: User): Promise<void> {
     await user.addToEnterprise(this)
-    await user.addRole(Roles.ADMIN)
+    try {
+      await user.addRole(Roles.ADMIN)
+    } catch (error) {
+      console.error('error adding role to user', error)
+      console.error('¿Maybe the user already has the role?')
+    }
     console.log('user added to enterprise')
   }
 

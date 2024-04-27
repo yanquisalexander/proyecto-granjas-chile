@@ -1,7 +1,9 @@
 <template>
     <PageContainer>
         <SectionHeader title="Empresas / PyMES">
-            <UButton @click="showCreateEnterpriseDialog">Crear Empresa</UButton>
+            <template #actions>
+                <UButton @click="showCreateEnterpriseDialog">Crear Empresa</UButton>
+            </template>
         </SectionHeader>
 
         <template v-if="enterprises">
@@ -44,7 +46,9 @@
                         <UButton color="blue" variant="soft" :to="`/admin/enterprises/${row.id}`">
                             <UIcon name="i-tabler-edit" />
                         </UButton>
-                        <UButton color="red" variant="soft" @click="showDeleteEnterpriseDialog(row.id)">
+                        <UButton color="red" variant="soft" :disabled="row.deleted_at"
+                            :title="row.deleted_at ? 'La empresa ya ha sido eliminada' : ''"
+                            @click="showDeleteEnterpriseDialog(row.id)">
                             <UIcon name="i-tabler-trash" />
                         </UButton>
                     </div>

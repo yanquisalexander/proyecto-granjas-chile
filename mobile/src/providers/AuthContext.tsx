@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 import axios, { AxiosError } from "axios";
 import * as SecureStore from "expo-secure-store";
 import { Constants } from "@/constants";
-import { Alert } from "react-native";
+import { ActivityIndicator, Alert } from "react-native";
 import { useSettings } from "./SettingsProvider";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 const { BACKEND_URL } = Constants;
@@ -125,7 +125,13 @@ export const AuthProvider = ({ children }: any) => {
 
     return (
         <AuthContext.Provider value={{ authState, login, logout, reloadUser }}>
-            {children}
+            {
+                authState.loadingUser ? (
+                    <ActivityIndicator size="large" color="#0000ff" />
+                ) : (
+                    children
+                )
+            }
         </AuthContext.Provider>
     );
 };

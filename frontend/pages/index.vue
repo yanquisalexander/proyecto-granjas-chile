@@ -1,6 +1,9 @@
 <template>
-    <h1>Home</h1>
-    <UButton color="pink" to="/about">About</UButton>
+    <PageContainer>
+        <SectionHeader title="Inicio" />
+        <DashboardProblems />
+
+    </PageContainer>
 </template>
 
 <script setup>
@@ -8,4 +11,7 @@
 useHead({
     title: 'Inicio',
 })
+
+
+
 </script>

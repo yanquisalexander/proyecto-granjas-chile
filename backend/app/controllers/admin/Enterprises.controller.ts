@@ -72,6 +72,13 @@ export class AdminEnterprisesController {
       return
     }
 
+    if(enterprise.deleted_at) {
+      res.status(401).json({
+        message: 'No puedes actualizar una empresa que ha sido eliminada.'
+      })
+      return
+    }
+
     try {
       console.log(req.files)
       enterprise.name = name || enterprise.name
@@ -155,6 +162,13 @@ export class AdminEnterprisesController {
       if (!enterprise) {
         res.status(404).json({
           message: 'Enterprise not found.'
+        })
+        return
+      }
+
+      if(enterprise.deleted_at) {
+        res.status(401).json({
+          message: 'Tu empresa ha sido eliminada y no puedes actualizarla.'
         })
         return
       }

@@ -32,6 +32,10 @@ const { getSession, signOut } = useAuth()
 
 const user = await getSession()
 
+const userHasEnterprise = computed(() => user?.enterprise !== null)
+const userIsAdmin = computed(() => user?.roles.find((role: any) => role.name === "admin"))
+const userIsSuperAdmin = computed(() => user?.roles.find((role: any) => role.name === "super_admin"))
+
 const headerLinks = ref([
     {
         to: "/",
@@ -43,25 +47,25 @@ const headerLinks = ref([
         to: "/admin/enterprises",
         label: "Empresas / PyMES",
         icon: "i-tabler-building",
-        visible: user?.roles.find((role: any) => role.name === "super_admin"),
+        visible: userIsSuperAdmin.value,
     },
     {
         to: "/my-enterprise",
         label: "Mi Empresa",
         icon: "i-tabler-building",
-        visible: user?.roles.find((role: any) => role.name === "admin"),
+        visible: userHasEnterprise.value && userIsAdmin.value,
     },
     {
         to: "/forms",
         label: "Formularios",
         icon: "i-tabler-file-text",
-        visible: user?.roles.find((role: any) => role.name === "admin"),
+        visible: userHasEnterprise.value && userIsAdmin.value,
     },
     {
         to: "/admin/users",
         label: "Usuarios",
         icon: "i-tabler-users",
-        visible: user?.roles.find((role: any) => role.name === "super_admin"),
+        visible: userIsSuperAdmin.value,
     },
     {
         to: "/profile",

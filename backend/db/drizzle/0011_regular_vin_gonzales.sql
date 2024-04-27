@@ -1,0 +1,1 @@
+ALTER TABLE "enterprises" ADD COLUMN "deleted_at" timestamp;

@@ -119,6 +119,8 @@ const editedEnterprise = ref<Enterprise | null>(null);
 const addAdminModal = ref(false);
 const users = ref<User[]>([]);
 const selectedAdminToAdd = ref<string | null>(null);
+const { id } = route.params;
+
 
 watch(addAdminModal, async (value) => {
     if (value) await fetchUsers();
@@ -192,13 +194,11 @@ const handleImageChange = (files: FileList | null) => {
 
 };
 
-const fetchEnterprise = async () => {
-    const { id } = route.params;
 
 
-    enterprise.value = await getEnterprise(id.toString());
-    editedEnterprise.value = { ...enterprise.value };
-};
+enterprise.value = await getEnterprise(id.toString());
+editedEnterprise.value = { ...enterprise.value };
+
 
 const editEnterprise = async () => {
     const { id } = route.params;
@@ -219,10 +219,13 @@ const editEnterprise = async () => {
         body: formData
     });
 
+    const responseJson = await response.json();
+
     if (!response.ok) {
         toast.add({
             title: 'Error al actualizar la empresa',
-            description: 'Ocurrió un error al actualizar la empresa. Por favor, intenta de nuevo.',
+
+            description: responseJson.message || 'Ocurrió un error al actualizar la empresa. Por favor, intenta de nuevo.',
             color: "red",
             icon: "i-tabler-alert-triangle"
         });
@@ -238,5 +241,4 @@ const editEnterprise = async () => {
     await fetchEnterprise();
 };
 
-onMounted(fetchEnterprise);
 </script>

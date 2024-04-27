@@ -12,6 +12,7 @@ export const EnterprisesTable = pgTable("enterprises", {
     company_logo: text("company_logo"),
     created_at: timestamp("created_at").defaultNow().notNull(),
     updated_at: timestamp("updated_at").defaultNow().notNull(),
+    deleted_at: timestamp("deleted_at"),
 })
 
 export const RolesTable = pgTable("roles", {

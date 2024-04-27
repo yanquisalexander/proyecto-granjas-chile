@@ -13,7 +13,7 @@ export default defineNuxtConfig({
     viewTransition: false,
   },
   ui: {
-    icons: ['tabler', 'fluent']
+    icons: ['tabler', 'fluent'],
   },
   auth: {
     baseURL: `${Configuration.BACKEND_URL}/`,
