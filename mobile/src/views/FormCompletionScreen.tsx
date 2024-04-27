@@ -9,6 +9,7 @@ import { Button, Div, ScrollDiv, Text } from "react-native-magnus";
 import { FormWithoutSteps } from "@/components/home/forms/FormWithoutSteps";
 import { FormLocked } from "@/components/home/forms/FormLocked";
 import { FormStep } from "@/components/home/forms/FormStep";
+import { FormStepper } from "@/components/home/forms/FormStepper";
 
 const styles = StyleSheet.create({
     container: {
@@ -144,6 +145,7 @@ export const FormCompletionScreen = () => {
 
 
             </ScrollDiv>
+            <FormStepper steps={form.steps} currentStep={currentStep} setCurrentStep={setCurrentStep} />
         </Div>
     )
 }
