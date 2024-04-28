@@ -10,6 +10,10 @@ import { FormWithoutSteps } from "@/components/home/forms/FormWithoutSteps";
 import { FormLocked } from "@/components/home/forms/FormLocked";
 import { FormStep } from "@/components/home/forms/FormStep";
 import { FormStepper } from "@/components/home/forms/FormStepper";
+import { useLocalDrafts } from "@/providers/LocalDraftsProvider";
+import { useDebounce } from "@uidotdev/usehooks";
+import { SavingLocally } from "@/components/home/forms/SavingLocally";
+
 
 const styles = StyleSheet.create({
     container: {
@@ -18,14 +22,12 @@ const styles = StyleSheet.create({
     },
 });
 
+const DEBOUNCE_TIME = 1000;
+
 export const FormCompletionScreen = () => {
     const [form, setForm] = useState<any>(null);
     /*
         Form draft is the form that the user is filling out. 
-        It is a draft because it is not yet submitted.
-
-        Should save the progress of the form in the backend and local storage.
-
         The object should be like this:
         {
             field_id: value,
@@ -35,25 +37,37 @@ export const FormCompletionScreen = () => {
         On load, the form should be loaded from the backend and the local storage
         and populate the fields with the values.
 
-        If the form has changed on the backend (For example, field deleted), ignore the uneeded fields on iteration.
-
     */
     const [formDraft, setFormDraft] = useState<any>(null);
     const [currentStep, setCurrentStep] = useState<number>(0);
     const [isFormLocked, setIsFormLocked] = useState<boolean>(false);
+    const [isSavingLocalDraft, setIsSavingLocalDraft] = useState<boolean>(false);
     const route = useRoute();
     const { formId } = route.params as any;
     const { getForm } = formServices();
+    const { getDraft, saveDraft } = useLocalDrafts();
+
+    const debouncedDraft = useDebounce(formDraft, 5000);
+
 
     const updateFieldValue = (fieldId: string, value: any) => {
         console.log(`Updating field ${fieldId} with value ${value}`);
+        setIsSavingLocalDraft(true);
         setFormDraft((prev: any) => {
-            return {
+            const updatedDraft = {
                 ...prev,
                 [fieldId]: value,
-            }
+            };
+            return updatedDraft;
         });
-    }
+    };
+
+    useEffect(() => {
+        if (formDraft) {
+            saveDraft(formId, formDraft);
+            setIsSavingLocalDraft(false);
+        }
+    }, [debouncedDraft]);
 
 
     useEffect(() => {
@@ -72,9 +86,16 @@ export const FormCompletionScreen = () => {
 
 
         console.log(formId);
+
         getForm(formId).then((form) => {
             setForm(form);
             console.log(JSON.stringify(form, null, 2));
+            const draft = getDraft(formId);
+            if (draft) {
+                setFormDraft(draft);
+            } else {
+                setFormDraft({});
+            }
         });
 
         return () => {
@@ -83,7 +104,7 @@ export const FormCompletionScreen = () => {
 
     }, []);
 
-    if (!form) {
+    if (!form || !formDraft) {
         return <Div><Text>Cargando...</Text></Div>;
     }
 
@@ -94,6 +115,7 @@ export const FormCompletionScreen = () => {
                     {form.title}
                 </Text>
             </SectionHeader>
+
 
             <ScrollDiv style={{ paddingHorizontal: 16 }} py={8}>
                 {
@@ -107,7 +129,6 @@ export const FormCompletionScreen = () => {
                         <FormWithoutSteps />
                     ) : (
                         <>
-                            <Text> Paso {currentStep + 1} de {form.steps.length}</Text>
                             {
                                 form.steps.map((step: any, index: number) => (
                                     index === currentStep ? (
@@ -131,11 +152,13 @@ export const FormCompletionScreen = () => {
                     )
                 }
 
+
+
                 <Text fontSize="xl" fontWeight="bold" mt={16}>
-                    Current Data (Draft)
+                    Current Step (JSON)
                 </Text>
 
-                <JSONText text={formDraft} />
+                <JSONText text={form.steps[currentStep]} />
 
                 <Text fontSize="xl" fontWeight="bold" mt={16}>
                     Form Data
@@ -145,6 +168,11 @@ export const FormCompletionScreen = () => {
 
 
             </ScrollDiv>
+            {
+                isSavingLocalDraft && (
+                    <SavingLocally />
+                )
+            }
             <FormStepper steps={form.steps} currentStep={currentStep} setCurrentStep={setCurrentStep} />
         </Div>
     )

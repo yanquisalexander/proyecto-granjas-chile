@@ -11,6 +11,7 @@ import {
 import { FontProvider } from "@/providers/FontProvider";
 import { SettingsProvider } from "@/providers/SettingsProvider";
 import { Theme } from "@/theme";
+import { LocalDraftsProvider } from "@/providers/LocalDraftsProvider";
 
 
 export default function App() {
@@ -19,10 +20,12 @@ export default function App() {
       <SettingsProvider>
         <FontProvider>
           <AuthProvider>
-            <NavigationContainer
-              onReady={() => console.log('App is ready!')}>
-              <StackNavigator />
-            </NavigationContainer>
+            <LocalDraftsProvider>
+              <NavigationContainer
+                onReady={() => console.log('App is ready!')}>
+                <StackNavigator />
+              </NavigationContainer>
+            </LocalDraftsProvider>
           </AuthProvider>
         </FontProvider>
       </SettingsProvider>
