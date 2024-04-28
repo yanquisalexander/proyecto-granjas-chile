@@ -11,9 +11,10 @@ export const ShortText = ({ field, updateFieldValue, isFormLocked, formDraft }: 
     return (
 
         <Input
-            value={field.value}
+            value={formDraft[field.id]}
             placeholder={field_name}
             editable={!isFormLocked}
+
             onChangeText={(value) => {
                 if (isFormLocked) {
                     console.log("Formulario bloqueado, no se puede editar");

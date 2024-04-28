@@ -7,7 +7,7 @@ export const Constants = (() => {
 
     return {
         APPLICATION_NAME: "Granjas de Chile",
-        BACKEND_URL: "http://192.168.1.10:3000",
+        BACKEND_URL: "http://192.168.1.14:3000",
         LOGO_PATH: "assets/images/logo.png",
         APPLICATION_VERSION: "0.0.1",
         IS_DEVELOPMENT,

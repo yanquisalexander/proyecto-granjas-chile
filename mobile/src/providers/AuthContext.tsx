@@ -77,6 +77,7 @@ export const AuthProvider = ({ children }: any) => {
         } else {
             // Handle other errors
             console.error(error);
+            setAuthState({ token: null, authenticated: false, user: null, loadingUser: false });
         }
     };
 
