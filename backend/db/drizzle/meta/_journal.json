@@ -5,85 +5,8 @@
     {
       "idx": 0,
       "version": "5",
-      "when": 1713488568658,
-      "tag": "0000_hard_junta",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "5",
-      "when": 1713488645248,
-      "tag": "0001_daily_bishop",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "5",
-      "when": 1713489572280,
-      "tag": "0002_wise_mimic",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "5",
-      "when": 1713489986164,
-      "tag": "0003_true_jack_murdock",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "5",
-      "when": 1713490662081,
-      "tag": "0004_true_thaddeus_ross",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "5",
-      "when": 1713491557321,
-      "tag": "0005_naive_frightful_four",
-      "breakpoints": true
-    },
-    {
-      "idx": 6,
-      "version": "5",
-      "when": 1713491584532,
-      "tag": "0006_keen_gamora",
-      "breakpoints": true
-    },
-    {
-      "idx": 7,
-      "version": "5",
-      "when": 1713491686333,
-      "tag": "0007_orange_hobgoblin",
-      "breakpoints": true
-    },
-    {
-      "idx": 8,
-      "version": "5",
-      "when": 1713570403043,
-      "tag": "0008_bent_prism",
-      "breakpoints": true
-    },
-    {
-      "idx": 9,
-      "version": "5",
-      "when": 1713570449025,
-      "tag": "0009_silly_juggernaut",
-      "breakpoints": true
-    },
-    {
-      "idx": 10,
-      "version": "5",
-      "when": 1713575764926,
-      "tag": "0010_lyrical_wallow",
-      "breakpoints": true
-    },
-    {
-      "idx": 11,
-      "version": "5",
-      "when": 1714238053216,
-      "tag": "0011_regular_vin_gonzales",
+      "when": 1714324367355,
+      "tag": "0000_natural_prima",
       "breakpoints": true
     }
   ]

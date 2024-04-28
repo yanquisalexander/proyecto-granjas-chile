@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { Toggle, Div, Text } from "react-native-magnus";
+import { type FieldOptions } from "@/types";
 
-export const YesNo = ({ field, updateFieldValue, isFormLocked, formDraft }: { field: any, updateFieldValue: Function, isFormLocked: boolean, formDraft: any }) => {
+export const YesNo = ({ field, updateFieldValue, isFormLocked, formDraft, options }: { field: any, updateFieldValue: Function, isFormLocked: boolean, formDraft: any, options: FieldOptions }) => {
     const {
         field_name,
-        options,
         conditions,
         required,
         field_type,

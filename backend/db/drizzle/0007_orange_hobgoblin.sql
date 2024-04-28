@@ -1,1 +1,0 @@
-ALTER TABLE "work_groups" ALTER COLUMN "name" SET NOT NULL;

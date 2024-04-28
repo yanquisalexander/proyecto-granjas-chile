@@ -2,7 +2,7 @@ import { FormStatus } from "@/app/models/Form.model";
 import { FormFieldTypes } from "@/app/models/FormField.model";
 import { table } from "console";
 import { relations } from "drizzle-orm";
-import { serial, text, timestamp, pgTable, uuid, boolean, primaryKey } from "drizzle-orm/pg-core";
+import { serial, text, timestamp, pgTable, uuid, boolean, primaryKey, json } from "drizzle-orm/pg-core";
 
 
 export const EnterprisesTable = pgTable("enterprises", {
@@ -91,9 +91,10 @@ export const FormFieldsTable = pgTable("form_fields", {
     id: uuid("id").primaryKey(),
     field_name: text("field_name"),
     field_type: text("field_type").$type<FormFieldTypes>(),
+    field_order: serial("field_order"),
     description: text("description"),
-    conditions: text("conditions").array(),
-    options: text("options").array(),
+    conditions: json("conditions").default([]),
+    options: json("options").default({}),
     required: boolean("required"),
     created_at: timestamp("created_at").defaultNow(),
     updated_at: timestamp("updated_at").defaultNow(),
@@ -102,7 +103,7 @@ export const FormFieldsTable = pgTable("form_fields", {
 
 export const FormResponsesTable = pgTable("form_responses", {
     id: uuid("id").primaryKey(),
-    response: text("response").array(),
+    response: json("response"),
     created_at: timestamp("created_at").defaultNow(),
     updated_at: timestamp("updated_at").defaultNow(),
     deleted_at: timestamp("deleted_at"),
@@ -112,7 +113,7 @@ export const FormResponsesTable = pgTable("form_responses", {
 
 export const FormResponsesDraftsTable = pgTable("form_responses_drafts", {
     id: uuid("id").primaryKey(),
-    response: text("response").array(),
+    response: json("response"),
     created_at: timestamp("created_at").defaultNow(),
     updated_at: timestamp("updated_at").defaultNow(),
     deleted_at: timestamp("deleted_at"),

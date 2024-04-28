@@ -62,11 +62,16 @@ export const AuthProvider = ({ children }: any) => {
 
 
     const getCurrentUser = async (token: string) => {
-        const response = await axios.get(`${BACKEND_URL}/accounts/current_user`, {
-            headers: { Authorization: `Bearer ${token}` },
-            timeout: 5000,
-        });
-        return response.data;
+        try {
+            const response = await axios.get(`${BACKEND_URL}/accounts/current_user`, {
+                headers: { Authorization: `Bearer ${token}` },
+                timeout: 5000,
+            });
+            return response.data;
+        } catch (error) {
+            handleAuthError(error);
+            throw error;
+        }
     };
 
     const handleAuthError = (error: any) => {

@@ -25,6 +25,7 @@ interface FormFieldAttributes {
   id: UUID
   field_name: string
   field_type: FormFieldTypes
+  field_order?: number
   description?: string
   conditions?: []
   options?: any[]
@@ -38,6 +39,7 @@ class FormField {
   id: UUID
   field_name: string
   field_type: FormFieldTypes
+  field_order?: number
   description?: string
   conditions?: any[]
   options?: any[]
@@ -50,6 +52,7 @@ class FormField {
     this.id = attributes.id
     this.field_name = attributes.field_name
     this.field_type = attributes.field_type
+    this.field_order = attributes.field_order
     this.description = attributes.description
     this.conditions = attributes.conditions
     this.options = attributes.options
@@ -73,7 +76,7 @@ class FormField {
   }
 
   static async findByFormStepId (stepId: UUID): Promise<FormField[]> {
-    const formFields = await Database.query('SELECT * FROM form_fields WHERE step_id = $1', [stepId])
+    const formFields = await Database.query('SELECT * FROM form_fields WHERE step_id = $1 ORDER BY field_order ASC', [stepId])
     return formFields.rows
   }
 
@@ -82,7 +85,7 @@ class FormField {
   }
 
   async update (): Promise<void> {
-    await Database.query('UPDATE form_fields SET field_name = $1, field_type = $2, description = $3, conditions = $4, options = $5, required = $6 WHERE id = $7', [this.field_name, this.field_type, this.description, this.conditions, this.options, this.required, this.id])
+    await Database.query('UPDATE form_fields SET field_name = $1, field_type = $2, description = $3, conditions = $4, options = $5, required = $6, field_order = $7, updated_at = NOW(), step_id = $8 WHERE id = $9', [this.field_name, this.field_type, this.description, this.conditions, this.options, this.required, this.field_order, this.step.id, this.id])
   }
 
   async delete (): Promise<void> {
@@ -119,6 +122,11 @@ class FormField {
   async removeCondition (condition: any): Promise<void> {
     if (!this.conditions) return
     this.conditions = this.conditions.filter((cond: any) => cond !== condition)
+  }
+
+  async updatePosition (position: number): Promise<void> {
+    this.field_order = position
+    await this.update()
   }
 }
 
