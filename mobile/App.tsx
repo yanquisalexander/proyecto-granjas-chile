@@ -12,6 +12,7 @@ import { FontProvider } from "@/providers/FontProvider";
 import { SettingsProvider } from "@/providers/SettingsProvider";
 import { Theme } from "@/theme";
 import { LocalDraftsProvider } from "@/providers/LocalDraftsProvider";
+import FlashMessage from "react-native-flash-message";
 
 
 export default function App() {
@@ -29,6 +30,7 @@ export default function App() {
           </AuthProvider>
         </FontProvider>
       </SettingsProvider>
+      <FlashMessage position="top" />
     </SafeAreaView>
   );
 }

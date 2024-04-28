@@ -3,9 +3,9 @@ import SectionHeader from "@/components/SectionHeader";
 import { Theme } from "@/theme";
 import { StyleSheet } from "react-native";
 import { formServices } from "@/services/forms";
-import { useRoute } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import { useEffect, useState } from "react"
-import { Button, Div, ScrollDiv, Text } from "react-native-magnus";
+import { Button, Div, Icon, ScrollDiv, Text } from "react-native-magnus";
 import { FormWithoutSteps } from "@/components/home/forms/FormWithoutSteps";
 import { FormLocked } from "@/components/home/forms/FormLocked";
 import { FormStep } from "@/components/home/forms/FormStep";
@@ -13,6 +13,7 @@ import { FormStepper } from "@/components/home/forms/FormStepper";
 import { useLocalDrafts } from "@/providers/LocalDraftsProvider";
 import { useDebounce } from "@uidotdev/usehooks";
 import { SavingLocally } from "@/components/home/forms/SavingLocally";
+import { showMessage, hideMessage } from "react-native-flash-message";
 
 
 const styles = StyleSheet.create({
@@ -43,6 +44,7 @@ export const FormCompletionScreen = () => {
     const [isFormLocked, setIsFormLocked] = useState<boolean>(false);
     const [isSavingLocalDraft, setIsSavingLocalDraft] = useState<boolean>(false);
     const route = useRoute();
+    const navigation = useNavigation();
     const { formId } = route.params as any;
     const { getForm } = formServices();
     const { getDraft, saveDraft } = useLocalDrafts();
@@ -67,7 +69,26 @@ export const FormCompletionScreen = () => {
             saveDraft(formId, formDraft);
             setIsSavingLocalDraft(false);
         }
+
     }, [debouncedDraft]);
+    useEffect(() => {
+        const unsubscribe = navigation.addListener('beforeRemove', (e) => {
+            if (isSavingLocalDraft) {
+                e.preventDefault();
+                showMessage({
+                    message: "Guardando cambios",
+                    description: "Un momento por favor, estamos guardando los cambios en el borrador local.",
+                    type: "info",
+                    icon: (props: any) => <Icon name="edit" fontFamily="Feather" color="white" {...props} />,
+                });
+            }
+        });
+
+        return () => {
+            unsubscribe();
+        };
+    }, [isSavingLocalDraft]);
+
 
 
     useEffect(() => {
@@ -110,6 +131,7 @@ export const FormCompletionScreen = () => {
 
     return (
         <Div style={styles.container}>
+
             <SectionHeader>
                 <Text fontSize="2xl" fontWeight="bold" ellipsizeMode="tail" numberOfLines={1}>
                     {form.title}
