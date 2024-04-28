@@ -33,7 +33,7 @@ export interface CurrentUser {
 
 export class Authenticator {
   private readonly user?: User
-
+  public static initialized = false
   constructor (user?: User) {
     this.user = user
   }
@@ -213,6 +213,8 @@ export class Authenticator {
         process.exit(1)
       }
     }
+
+    Authenticator.initialized = true
   }
 
   static jwtSign (userId: string, expiresIn?: number): string {
