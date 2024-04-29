@@ -13,6 +13,7 @@ import { SettingsProvider } from "@/providers/SettingsProvider";
 import { Theme } from "@/theme";
 import { LocalDraftsProvider } from "@/providers/LocalDraftsProvider";
 import FlashMessage from "react-native-flash-message";
+import { SocketIOProvider } from "@/providers/SocketIOProvider";
 
 
 export default function App() {
@@ -21,12 +22,14 @@ export default function App() {
       <SettingsProvider>
         <FontProvider>
           <AuthProvider>
-            <LocalDraftsProvider>
-              <NavigationContainer
-                onReady={() => console.log('App is ready!')}>
-                <StackNavigator />
-              </NavigationContainer>
-            </LocalDraftsProvider>
+            <SocketIOProvider>
+              <LocalDraftsProvider>
+                <NavigationContainer
+                  onReady={() => console.log('App is ready!')}>
+                  <StackNavigator />
+                </NavigationContainer>
+              </LocalDraftsProvider>
+            </SocketIOProvider>
           </AuthProvider>
         </FontProvider>
       </SettingsProvider>

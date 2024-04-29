@@ -14,6 +14,8 @@ import { useLocalDrafts } from "@/providers/LocalDraftsProvider";
 import { useDebounce } from "@uidotdev/usehooks";
 import { SavingLocally } from "@/components/home/forms/SavingLocally";
 import { showMessage, hideMessage } from "react-native-flash-message";
+import { useSocket } from "@/providers/SocketIOProvider";
+import FormNavigation from "@/components/home/forms/FormNavigation";
 
 
 const styles = StyleSheet.create({
@@ -23,7 +25,7 @@ const styles = StyleSheet.create({
     },
 });
 
-const DEBOUNCE_TIME = 1000;
+const DEBOUNCE_TIME = 5000;
 
 export const FormCompletionScreen = () => {
     const [form, setForm] = useState<any>(null);
@@ -48,8 +50,55 @@ export const FormCompletionScreen = () => {
     const { formId } = route.params as any;
     const { getForm } = formServices();
     const { getDraft, saveDraft } = useLocalDrafts();
+    const socket = useSocket();
 
-    const debouncedDraft = useDebounce(formDraft, 5000);
+    socket?.emit(`/forms/${formId}`)
+
+    socket?.on("form_updated", (data: any) => {
+        console.log("Form updated", data);
+        setForm(data);
+    });
+
+    const debouncedDraft = useDebounce(formDraft, DEBOUNCE_TIME);
+
+    const isFormRequiredFieldsFilled = () => {
+        if (!formDraft || !form.steps) {
+            return false;
+        }
+
+        for (const step of form.steps) {
+            if (!step.fields) {
+                continue;
+            }
+
+            for (const field of step.fields) {
+                console.log(JSON.stringify(field, null, 2));
+                if (field.required && (!formDraft[field.id] || formDraft[field.id] === "")) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    };
+
+
+
+    const onFormSubmit = () => {
+        if (!isFormRequiredFieldsFilled()) {
+            showMessage({
+                message: "Faltan campos por completar",
+                description: "Por favor, complete los campos obligatorios antes de enviar el formulario.",
+                type: "warning",
+                icon: (props: any) => <Icon name="alert-triangle" fontFamily="Feather" color="white" {...props} />,
+            });
+            return;
+        }
+
+        console.log(formDraft)
+
+        console.log("Form submitted");
+    }
 
 
     const updateFieldValue = (fieldId: string, value: any) => {
@@ -92,22 +141,6 @@ export const FormCompletionScreen = () => {
 
 
     useEffect(() => {
-        const pollForm = async () => {
-            try {
-                const serverForm = await getForm(formId);
-                if (JSON.stringify(serverForm) !== JSON.stringify(form)) {
-                    setIsFormLocked(true);
-                }
-            } catch (error) {
-                console.error("Error al obtener el formulario:", error);
-            }
-        };
-
-        // const interval = setInterval(pollForm, 20000);
-
-
-        console.log(formId);
-
         getForm(formId).then((form) => {
             setForm(form);
             console.log(JSON.stringify(form, null, 2));
@@ -120,7 +153,7 @@ export const FormCompletionScreen = () => {
         });
 
         return () => {
-            // clearInterval(interval);
+            socket?.removeListener(`/forms/${formId}`);
         }
 
     }, []);
@@ -139,60 +172,57 @@ export const FormCompletionScreen = () => {
             </SectionHeader>
 
 
-            <ScrollDiv style={{ paddingHorizontal: 16 }} py={8}>
-                {
-                    isFormLocked && (
-                        <FormLocked />
-                    )
-                }
+            <ScrollDiv style={{ paddingHorizontal: 16 }}>
+                <Div my={4}>
+                    {
+                        isFormLocked && (
+                            <FormLocked />
+                        )
+                    }
 
-                {
-                    form.steps.length === 0 ? (
-                        <FormWithoutSteps />
-                    ) : (
-                        <>
-                            {
-                                form.steps.map((step: any, index: number) => (
-                                    index === currentStep ? (
-                                        <FormStep key={index} step={step} updateFieldValue={updateFieldValue} isFormLocked={isFormLocked} formDraft={formDraft} />
-                                    ) : null
-                                ))
-                            }
+                    {
+                        form.steps.length === 0 ? (
+                            <FormWithoutSteps />
+                        ) : (
+                            <>
+                                {
+                                    form.steps.map((step: any, index: number) => (
+                                        index === currentStep ? (
+                                            <FormStep key={index} step={step} updateFieldValue={updateFieldValue} isFormLocked={isFormLocked} formDraft={formDraft} />
+                                        ) : null
+                                    ))
+                                }
 
-                            {
-                                currentStep < form.steps.length - 1 ? (
-                                    <Div>
-                                        <Button onPress={() => setCurrentStep(currentStep + 1)}>Siguiente</Button>
-                                    </Div>
-                                ) : (
-                                    <Div>
-                                        <Button onPress={() => console.log("Submit")}>Enviar</Button>
-                                    </Div>
-                                )
-                            }
-                        </>
-                    )
-                }
+                            </>
+                        )
+                    }
 
 
 
-                <Text fontSize="xl" fontWeight="bold" mt={16}>
-                    Current Step (JSON)
-                </Text>
+                    <Text fontSize="xl" fontWeight="bold" mt={16}>
+                        Current Step (JSON)
+                    </Text>
 
-                <JSONText text={form.steps[currentStep]} />
+                    <JSONText text={form.steps[currentStep]} />
 
-                <Text fontSize="xl" fontWeight="bold" mt={16}>
-                    Form Data
-                </Text>
+                    <Text fontSize="xl" fontWeight="bold" mt={16}>
+                        Form Data
+                    </Text>
 
-                <JSONText text={form} />
+                    <JSONText text={form} />
 
-
+                </Div>
             </ScrollDiv>
             {
                 isSavingLocalDraft && (
                     <SavingLocally />
+                )
+            }
+            {
+                form.steps.length > 0 && (
+                    <Div p={4} bg="white" shadow="md" row justifyContent="space-between">
+                        <FormNavigation currentStep={currentStep} totalSteps={form.steps.length} onNextStep={() => setCurrentStep(currentStep + 1)} onPreviousStep={() => setCurrentStep(currentStep - 1)} onSubmit={onFormSubmit} />
+                    </Div>
                 )
             }
             <FormStepper steps={form.steps} currentStep={currentStep} setCurrentStep={setCurrentStep} />

@@ -9,7 +9,9 @@ import router from '../config/router'
 import bodyParser from 'body-parser'
 import multer from 'multer'
 import path from 'node:path'
+import SocketIO from "./SocketIO.module"
 const __dirname = path.resolve()
+
 
 class WebServer {
   private readonly app: Express
@@ -119,6 +121,9 @@ class WebServer {
       }
 
       this.ioServer = http.createServer(this.app)
+
+      const socket = SocketIO.initialize(this.ioServer)
+      console.log(SocketIO.getInstance())
 
       await new Promise<void>((resolve) => {
         if (!this.ioServer) {

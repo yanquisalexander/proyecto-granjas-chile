@@ -17,6 +17,15 @@ export const FormStep = ({ step, updateFieldValue, isFormLocked, formDraft }: { 
 
             <Div>
                 {
+                    step.fields.length === 0 && (
+                        <Div p={4} rounded="md" my={4}>
+                            <Text color="gray600">
+                                Este paso no tiene campos para completar
+                            </Text>
+                        </Div>
+                    )
+                }
+                {
                     step.fields.map((field: any, index: number) => (
                         <FormField key={index} field={field} updateFieldValue={updateFieldValue} isFormLocked={isFormLocked} formDraft={formDraft} />
                     ))
