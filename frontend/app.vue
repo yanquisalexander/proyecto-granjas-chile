@@ -1,6 +1,6 @@
 <template>
   <div id="application">
-    <NuxtLoadingIndicator />
+    <NuxtLoadingIndicator color="blue" />
     <NuxtLayout>
       <NuxtPage />
       <UNotifications />

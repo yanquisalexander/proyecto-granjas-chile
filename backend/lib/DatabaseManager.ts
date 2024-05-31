@@ -9,11 +9,11 @@ const { Pool } = pg
 class Database {
   public static pool: pg.Pool
 
-  private constructor () {
+  private constructor() {
     // Private constructor to prevent instantiation
   }
 
-  private static initializePool (): void {
+  private static initializePool(): void {
     if (!Database.pool) {
       Database.pool = new Pool({
         database: Configuration.DATABASE_NAME,
@@ -41,16 +41,20 @@ class Database {
     }
   }
 
-  static connect (): void {
-
+  static connect(): void {
     if (!Database.pool) {
       Database.initializePool()
     }
 
     try {
-      Database.pool.connect()
-      console.log(chalk.green('[DATABASE MANAGER]'), chalk.yellow('Connected to database'))
-      Loggers.Database.writeLog('Connected to database')
+      Database.pool.connect().then(client => {
+        console.log(chalk.green('[DATABASE MANAGER]'), chalk.yellow('Connected to database'))
+        Loggers.Database.writeLog('Connected to database')
+      }).catch(error => {
+        Configuration.IS_PRODUCTION ? console.error(chalk.red('[DATABASE MANAGER]'), 'An error occurred while connecting to the database. Check the logs for more details') : console.error(chalk.red('[DATABASE MANAGER]'), error)
+        Loggers.Database.writeLog((error as Error).message)
+        throw error
+      })
     } catch (error) {
       Configuration.IS_PRODUCTION ? console.error(chalk.red('[DATABASE MANAGER]'), 'An error occurred while connecting to the database. Check the logs for more details') : console.error(chalk.red('[DATABASE MANAGER]'), error)
       Loggers.Database.writeLog((error as Error).message)
@@ -58,7 +62,7 @@ class Database {
     }
   }
 
-  static async query (text: string, params: any[] = [], skipLog: boolean = false): Promise<QueryResult> {
+  static async query(text: string, params: any[] = [], skipLog: boolean = false): Promise<QueryResult> {
     if (!Database.pool) {
       throw new Error('Database pool not initialized')
     }
@@ -100,7 +104,7 @@ class Database {
     }
   }
 
-  static async runMigration (sql: string, name: string): Promise<void> {
+  static async runMigration(sql: string, name: string): Promise<void> {
     Database.initializePool()
 
     if (!Database.pool) {
@@ -124,9 +128,14 @@ class Database {
     }
   }
 
-  static async close (): Promise<void> {
+  static async close(): Promise<void> {
     if (Database.pool) {
       await Database.pool.end()
+      console.log(chalk.green('[DATABASE MANAGER]'), chalk.yellow('Connection to database closed'))
+      console.log(chalk.green('[APPLICATION]'), chalk.yellow('Exiting...'))
+      Loggers.Database.writeLog('Connection to database closed')
+      Loggers.Default.writeLog('Exiting...')
+      process.exit(0)
     }
   }
 }

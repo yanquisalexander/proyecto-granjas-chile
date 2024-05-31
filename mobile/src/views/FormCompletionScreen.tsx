@@ -16,6 +16,7 @@ import { SavingLocally } from "@/components/home/forms/SavingLocally";
 import { showMessage, hideMessage } from "react-native-flash-message";
 import { useSocket } from "@/providers/SocketIOProvider";
 import FormNavigation from "@/components/home/forms/FormNavigation";
+import { Socket } from "socket.io-client";
 
 
 const styles = StyleSheet.create({
@@ -50,13 +51,19 @@ export const FormCompletionScreen = () => {
     const { formId } = route.params as any;
     const { getForm } = formServices();
     const { getDraft, saveDraft } = useLocalDrafts();
-    const socket = useSocket();
+    const socket = useSocket() as Socket
 
-    socket?.emit(`/forms/${formId}`)
+    socket.emit('/subscribe', `/forms/${formId}`)
 
-    socket?.on("form_updated", (data: any) => {
-        console.log("Form updated", data);
-        setForm(data);
+    socket.on("form_updated", (data: any) => {
+        setIsFormLocked(true);
+        setIsSavingLocalDraft(true);
+        setFormDraft((prev: any) => {
+            return {
+                ...prev,
+                ...data,
+            };
+        });
     });
 
     const debouncedDraft = useDebounce(formDraft, DEBOUNCE_TIME);
@@ -72,7 +79,6 @@ export const FormCompletionScreen = () => {
             }
 
             for (const field of step.fields) {
-                console.log(JSON.stringify(field, null, 2));
                 if (field.required && (!formDraft[field.id] || formDraft[field.id] === "")) {
                     return false;
                 }
@@ -95,14 +101,12 @@ export const FormCompletionScreen = () => {
             return;
         }
 
-        console.log(formDraft)
 
         console.log("Form submitted");
     }
 
 
     const updateFieldValue = (fieldId: string, value: any) => {
-        console.log(`Updating field ${fieldId} with value ${value}`);
         setIsSavingLocalDraft(true);
         setFormDraft((prev: any) => {
             const updatedDraft = {
@@ -143,7 +147,6 @@ export const FormCompletionScreen = () => {
     useEffect(() => {
         getForm(formId).then((form) => {
             setForm(form);
-            console.log(JSON.stringify(form, null, 2));
             const draft = getDraft(formId);
             if (draft) {
                 setFormDraft(draft);
@@ -198,7 +201,7 @@ export const FormCompletionScreen = () => {
                     }
 
 
-
+                    {/* 
                     <Text fontSize="xl" fontWeight="bold" mt={16}>
                         Current Step (JSON)
                     </Text>
@@ -209,7 +212,7 @@ export const FormCompletionScreen = () => {
                         Form Data
                     </Text>
 
-                    <JSONText text={form} />
+                    <JSONText text={form} /> */}
 
                 </Div>
             </ScrollDiv>
@@ -221,7 +224,14 @@ export const FormCompletionScreen = () => {
             {
                 form.steps.length > 0 && (
                     <Div p={4} bg="white" shadow="md" row justifyContent="space-between">
-                        <FormNavigation currentStep={currentStep} totalSteps={form.steps.length} onNextStep={() => setCurrentStep(currentStep + 1)} onPreviousStep={() => setCurrentStep(currentStep - 1)} onSubmit={onFormSubmit} />
+                        <FormNavigation
+                            currentStep={currentStep}
+                            totalSteps={form.steps.length}
+                            onNextStep={() => setCurrentStep(currentStep + 1)}
+                            onPreviousStep={() => setCurrentStep(currentStep - 1)}
+                            onSubmit={onFormSubmit}
+                            isFormLocked={isFormLocked}
+                        />
                     </Div>
                 )
             }

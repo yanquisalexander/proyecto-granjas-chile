@@ -29,6 +29,7 @@ export const YesNo = ({ field, updateFieldValue, isFormLocked, formDraft, option
         <Div mt={8} flex={1} row>
             <Toggle
                 on={isCheck}
+                disabled={isFormLocked}
                 onPress={() => handleChecked(!isCheck)}
                 bg="gray200"
                 circleBg="white"

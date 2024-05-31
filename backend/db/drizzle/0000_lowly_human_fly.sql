@@ -49,7 +49,8 @@ CREATE TABLE IF NOT EXISTS "form_steps" (
 	"created_at" timestamp DEFAULT now(),
 	"updated_at" timestamp DEFAULT now(),
 	"deleted_at" timestamp,
-	"form_id" uuid NOT NULL
+	"form_id" uuid NOT NULL,
+	"step_order" serial NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "forms" (
@@ -81,8 +82,20 @@ CREATE TABLE IF NOT EXISTS "site_settings" (
 	CONSTRAINT "site_settings_key_unique" UNIQUE("key")
 );
 --> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "uploads" (
+	"id" uuid PRIMARY KEY NOT NULL,
+	"file_name" text NOT NULL,
+	"file_path" text NOT NULL,
+	"public_url" text NOT NULL,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now() NOT NULL,
+	"deleted_at" timestamp,
+	"mime_type" text NOT NULL,
+	"user_id" uuid NOT NULL
+);
+--> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "user_roles" (
-	"id" serial PRIMARY KEY NOT NULL,
+	"id" serial NOT NULL,
 	"user_id" uuid,
 	"role_id" serial NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL,
@@ -160,6 +173,12 @@ END $$;
 --> statement-breakpoint
 DO $$ BEGIN
  ALTER TABLE "forms" ADD CONSTRAINT "forms_work_group_id_work_groups_id_fk" FOREIGN KEY ("work_group_id") REFERENCES "work_groups"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "uploads" ADD CONSTRAINT "uploads_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;

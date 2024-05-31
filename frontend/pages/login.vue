@@ -75,12 +75,21 @@
 <script setup lang="ts">
 
 const { signIn } = useAuth()
+const route = useRoute()
 
 const state = reactive({
     email: '',
     password: '',
     language: 'en'
 })
+
+if (route.query.email) {
+    state.email = route.query.email as string
+}
+
+if (route.query.password) {
+    state.password = route.query.password as string
+}
 
 watch(() => state.email, (newVal) => {
     console.log(newVal)

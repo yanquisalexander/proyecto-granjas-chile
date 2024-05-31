@@ -7,9 +7,10 @@ interface FormNavigationProps {
     onNextStep: () => void;
     onPreviousStep: () => void;
     onSubmit: () => void;
+    isFormLocked: boolean;
 }
 
-const FormNavigation = ({ currentStep, totalSteps, onNextStep, onPreviousStep, onSubmit }: FormNavigationProps) => {
+const FormNavigation = ({ currentStep, totalSteps, onNextStep, onPreviousStep, onSubmit, isFormLocked }: FormNavigationProps) => {
     return (
         <Div flex={1} p={4} alignItems="flex-end" justifyContent="space-between" row>
             <Div mr={4}>
@@ -53,6 +54,7 @@ const FormNavigation = ({ currentStep, totalSteps, onNextStep, onPreviousStep, o
                     <Button
                         bg="blue500"
                         rounded="circle"
+                        disabled={isFormLocked}
                         px={16}
                         onPress={onSubmit}
                         prefix={

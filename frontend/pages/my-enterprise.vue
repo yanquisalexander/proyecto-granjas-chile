@@ -25,6 +25,10 @@
 
 const route = useRouter()
 
+useHead({
+    title: 'Mi Empresa',
+})
+
 
 const tabs = [{
     id: 'info',

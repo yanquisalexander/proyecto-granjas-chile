@@ -1,6 +1,6 @@
 {
-  "id": "74fd00e6-681e-4496-9064-1170f7e360f2",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "8d766124-8c2b-4c79-956b-dba6e360c1f4",
+  "prevId": "74fd00e6-681e-4496-9064-1170f7e360f2",
   "version": "5",
   "dialect": "pg",
   "tables": {
@@ -441,6 +441,12 @@
           "type": "uuid",
           "primaryKey": false,
           "notNull": false
+        },
+        "enterprise_id": {
+          "name": "enterprise_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
         }
       },
       "indexes": {},
@@ -451,6 +457,19 @@
           "tableTo": "work_groups",
           "columnsFrom": [
             "work_group_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "forms_enterprise_id_enterprises_id_fk": {
+          "name": "forms_enterprise_id_enterprises_id_fk",
+          "tableFrom": "forms",
+          "tableTo": "enterprises",
+          "columnsFrom": [
+            "enterprise_id"
           ],
           "columnsTo": [
             "id"

@@ -1,9 +1,7 @@
 import { FormStatus } from "@/app/models/Form.model";
 import { FormFieldTypes } from "@/app/models/FormField.model";
-import { table } from "console";
 import { relations } from "drizzle-orm";
 import { serial, text, timestamp, pgTable, uuid, boolean, primaryKey, json } from "drizzle-orm/pg-core";
-
 
 export const EnterprisesTable = pgTable("enterprises", {
     id: uuid("id").primaryKey().notNull(),
@@ -22,7 +20,6 @@ export const RolesTable = pgTable("roles", {
     scopes: text("scopes").array()
 })
 
-
 export const UsersTable = pgTable("users", {
     id: uuid("id").notNull().primaryKey(),
     username: text("username").unique().notNull(),
@@ -33,15 +30,43 @@ export const UsersTable = pgTable("users", {
     deleted_at: timestamp("deleted_at"),
     enterprise_id: uuid("enterprise_id").references(() => EnterprisesTable.id),
 })
+
+export const UserRolesTable = pgTable("user_roles", {
+    id: serial("id"),
+    user_id: uuid("user_id").references(() => UsersTable.id),
+    role_id: serial("role_id").references(() => RolesTable.id),
+    updated_at: timestamp("updated_at").defaultNow().notNull(),
+}, (table) => {
+    return {
+        pk: primaryKey({ columns: [table.user_id, table.role_id] })
+    }
+})
+
 export const usersRelations = relations(UsersTable, ({ one, many }) => ({
     enterprise: one(EnterprisesTable, {
         fields: [UsersTable.enterprise_id],
         references: [EnterprisesTable.id],
     }),
-    roles: many(RolesTable, {
-       relationName: "user_roles",
+    roles: many(UserRolesTable),
+    workGroups: many(WorkGroupMembersTable),
+    uploads: many(UploadsTable),
+    responses: many(FormResponsesTable),
+    drafts: many(FormResponsesDraftsTable),
+}))
+
+export const usersRolesRelations = relations(UserRolesTable, ({ one, many }) => ({
+    user: one(UsersTable, {
+        fields: [UserRolesTable.user_id],
+        references: [UsersTable.id]
     }),
-}));
+    role: one(RolesTable, {
+        fields: [UserRolesTable.role_id],
+        references: [RolesTable.id],
+    }),
+}))
+
+
+
 
 
 export const WorkGroupsTable = pgTable("work_groups", {
@@ -62,7 +87,7 @@ export const WorkGroupMembersTable = pgTable("work_group_members", {
     deleted_at: timestamp("deleted_at")
 }, (table) => {
     return {
-        pk: primaryKey({ columns: [table.user_id, table.work_group_id]})
+        pk: primaryKey({ columns: [table.user_id, table.work_group_id] })
     }
 })
 
@@ -75,6 +100,7 @@ export const FormsTable = pgTable("forms", {
     updated_at: timestamp("updated_at").defaultNow(),
     deleted_at: timestamp("deleted_at"),
     work_group_id: uuid("work_group_id").references(() => WorkGroupsTable.id),
+    enterprise_id: uuid("enterprise_id").references(() => EnterprisesTable.id).notNull(),
 })
 
 export const FormStepsTable = pgTable("form_steps", {
@@ -85,6 +111,7 @@ export const FormStepsTable = pgTable("form_steps", {
     updated_at: timestamp("updated_at").defaultNow(),
     deleted_at: timestamp("deleted_at"),
     form_id: uuid("form_id").references(() => FormsTable.id).notNull(),
+    step_order: serial("step_order"),
 })
 
 export const FormFieldsTable = pgTable("form_fields", {
@@ -126,15 +153,14 @@ export const formRelations = relations(FormsTable, ({ one, many }) => ({
         fields: [FormsTable.work_group_id],
         references: [WorkGroupsTable.id]
     }),
-    steps: many(FormStepsTable, {
-        relationName: "steps",
+}))
+
+export const formStepsRelations = relations(FormStepsTable, ({ one, many }) => ({
+    form: one(FormsTable, {
+        fields: [FormStepsTable.form_id],
+        references: [FormsTable.id]
     }),
-    responses: many(FormResponsesTable, {
-        relationName: "responses",
-    }),
-    drafts: many(FormResponsesDraftsTable, {
-        relationName: "drafts",
-    })
+    fields: many(FormFieldsTable)
 }))
 
 export const workGroupRelations = relations(WorkGroupsTable, ({ one, many }) => ({
@@ -145,9 +171,7 @@ export const workGroupRelations = relations(WorkGroupsTable, ({ one, many }) => 
     members: many(WorkGroupMembersTable, {
         relationName: "members",
     }),
-    forms: many(FormsTable, {
-        relationName: "forms",
-    })
+    forms: many(FormsTable)
 }))
 
 export const SiteSettingsTable = pgTable("site_settings", {
@@ -158,31 +182,6 @@ export const SiteSettingsTable = pgTable("site_settings", {
     updated_at: timestamp("updated_at").defaultNow(),
     deleted_at: timestamp("deleted_at")
 })
-
-export const UserRolesTable = pgTable("user_roles", {
-    id: serial("id").primaryKey(),
-    user_id: uuid("user_id").references(() => UsersTable.id),
-    role_id: serial("role_id").references(() => RolesTable.id),
-    updated_at: timestamp("updated_at").defaultNow().notNull(),
-}, (table) => {
-    return {
-        // composite primary key
-        pk: primaryKey({ columns: [table.user_id, table.role_id]})
-    }
-})
-
-
-export const userRolesRelations = relations(UserRolesTable, ({ one, many }) => ({
-    user: one(UsersTable, {
-        fields: [UserRolesTable.user_id],
-        references: [UsersTable.id],
-    }),
-    role: one(RolesTable, {
-        fields: [UserRolesTable.role_id],
-        references: [RolesTable.id],
-    }),
-}));
-
 export const workGroupMembersRelations = relations(WorkGroupMembersTable, ({ one, many }) => ({
     user: one(UsersTable, {
         fields: [WorkGroupMembersTable.user_id],
@@ -191,5 +190,24 @@ export const workGroupMembersRelations = relations(WorkGroupMembersTable, ({ one
     workGroup: one(WorkGroupsTable, {
         fields: [WorkGroupMembersTable.work_group_id],
         references: [WorkGroupsTable.id],
+    }),
+}));
+
+export const UploadsTable = pgTable("uploads", {
+    id: uuid("id").primaryKey().notNull(),
+    file_name: text("file_name").notNull(),
+    file_path: text("file_path").notNull(),
+    public_url: text("public_url").notNull(),
+    created_at: timestamp("created_at").defaultNow().notNull(),
+    updated_at: timestamp("updated_at").defaultNow().notNull(),
+    deleted_at: timestamp("deleted_at"),
+    mime_type: text("mime_type").notNull(),
+    user_id: uuid("user_id").references(() => UsersTable.id).notNull(),
+})
+
+export const uploadsRelations = relations(UploadsTable, ({ one, many }) => ({
+    user: one(UsersTable, {
+        fields: [UploadsTable.user_id],
+        references: [UsersTable.id],
     }),
 }));

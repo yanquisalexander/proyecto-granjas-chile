@@ -1,5 +1,5 @@
 import Enterprise from '@/app/models/Enterprise.model'
-import Role, { Roles } from '@/app/models/Role.model'
+import Role, { RoleValue, Roles } from '@/app/models/Role.model'
 import User from '@/app/models/User.model'
 import WorkGroup from '@/app/models/WorkGroup.model'
 import { Configuration } from '@/config'
@@ -34,11 +34,11 @@ export interface CurrentUser {
 export class Authenticator {
   private readonly user?: User
   public static initialized = false
-  constructor (user?: User) {
+  constructor(user?: User) {
     this.user = user
   }
 
-  async currentUser (): Promise<CurrentUser | null> {
+  async currentUser(): Promise<CurrentUser | null> {
     console.log(chalk.bgCyan.bold('[AUTHENTICATOR]'), chalk.white('Getting current user...'))
     if (!this.user) return null
     console.log(chalk.bgCyan.bold('[AUTHENTICATOR]'), chalk.white('User found:'), this.user)
@@ -63,28 +63,28 @@ export class Authenticator {
     }
   }
 
-  get isAuthenticated (): boolean {
+  get isAuthenticated(): boolean {
     return !!this.user
   }
 
-  async hasNeededRoles (roles: Role[]): Promise<boolean> {
+  async hasNeededRoles(roles: Role[]): Promise<boolean> {
     if (!this.user) return false
     const userRoles = await this.user.getRoles()
     return userRoles.some(userRole => roles.some(role => role.name === userRole.name))
   }
 
-  static async hashPassword (password: string): Promise<string> {
+  static async hashPassword(password: string): Promise<string> {
     if (!password) throw new Error('Password is required')
     const salt = await bcrypt.genSalt(SALT_ROUNDS)
     return await bcrypt.hash(password, salt)
   }
 
-  static async comparePassword (password: string, hash: string): Promise<boolean> {
+  static async comparePassword(password: string, hash: string): Promise<boolean> {
     console.log(chalk.bgCyan.bold('[AUTHENTICATOR]'), chalk.white('Comparing password...'))
     return await bcrypt.compare(password, hash)
   }
 
-  static async middleware (req: Request, res: Response, next: NextFunction): Promise<void> {
+  static async middleware(req: Request, res: Response, next: NextFunction): Promise<void> {
     passport.authenticate('jwt', { session: false }, (err: Error, user: User) => {
       console.log(chalk.bgCyan.bold('[PASSPORT]'), chalk.white('Middleware called'))
       console.log(chalk.bgCyan.bold('[PASSPORT]'), chalk.white('Error:'), err)
@@ -105,7 +105,7 @@ export class Authenticator {
     })(req, res, next)
   }
 
-  static requiredRoleMiddleware (roles: Roles[]) {
+  static requiredRoleMiddleware(roles: RoleValue[]) {
     // Roles is an Enum array
     return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
       console.log(chalk.bgCyan.bold('[AUTHENTICATOR]'), chalk.white('Role middleware called'))
@@ -125,7 +125,7 @@ export class Authenticator {
     }
   }
 
-  static hasSomeRolesMiddleware (roles: Roles[]) {
+  static hasSomeRolesMiddleware(roles: RoleValue[]) {
     return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
       console.log(chalk.bgCyan.bold('[AUTHENTICATOR]'), chalk.white('Role middleware called'))
       const user = req.user as User
@@ -145,7 +145,7 @@ export class Authenticator {
     }
   }
 
-  static async initialize () {
+  static async initialize() {
     console.log('Initializing authenticator...')
     passport.use('jwt', new JwtStrategy({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -217,9 +217,9 @@ export class Authenticator {
     Authenticator.initialized = true
   }
 
-  static jwtSign (userId: string, expiresIn?: number): string {
+  static jwtSign(userId: string, expiresIn?: number): string {
     // 1 hour by default
-    if(!expiresIn) expiresIn = 60 * 60
+    if (!expiresIn) expiresIn = 60 * 60
     return jwt.sign({ user_id: userId }, Configuration.JWT_SECRET, { expiresIn })
   }
 }

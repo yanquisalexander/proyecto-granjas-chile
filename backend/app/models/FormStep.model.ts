@@ -2,6 +2,9 @@ import Database from '@/lib/DatabaseManager'
 import { UUID } from 'crypto'
 import Form from '@/app/models/Form.model'
 import FormField from './FormField.model'
+import { dbService } from "../services/Database"
+import { FormStepsTable } from "@/db/schema"
+import { eq } from "drizzle-orm"
 
 export interface FormStepAttributes {
   id: UUID
@@ -11,6 +14,7 @@ export interface FormStepAttributes {
   updated_at?: Date
   form: Form
   fields?: FormField[]
+  step_order?: number
 }
 
 class FormStep {
@@ -21,6 +25,7 @@ class FormStep {
   updated_at?: Date
   form: Form
   fields?: FormField[]
+  step_order?: number
 
   constructor (attributes: FormStepAttributes) {
     this.id = attributes.id
@@ -30,6 +35,7 @@ class FormStep {
     this.updated_at = attributes.updated_at
     this.form = attributes.form
     this.fields = attributes.fields
+    this.step_order = attributes.step_order
   }
 
   static async findById (id: UUID): Promise<FormStep | null> {
@@ -41,7 +47,7 @@ class FormStep {
   }
 
   static async findByFormId (formId: string): Promise<FormStep[]> {
-    const formSteps = await Database.query('SELECT * FROM form_steps WHERE form_id = $1', [formId])
+    const formSteps = await Database.query('SELECT * FROM form_steps WHERE form_id = $1 ORDER BY step_order', [formId])
     const steps = formSteps.rows.map(step => new FormStep(step))
     return steps
   }
@@ -51,7 +57,28 @@ class FormStep {
   }
 
   async update (): Promise<void> {
-    await Database.query('UPDATE form_steps SET title = $1, description = $2 WHERE id = $3', [this.title, this.description, this.id])
+    console.log('Updating form step', this.id)
+    console.log('Form ID', this.form)
+    await dbService.insert(FormStepsTable)
+      .values({
+        id: this.id,
+        title: this.title,
+        description: this.description,
+        form_id: this.form.id,
+        step_order: this.step_order
+      }).onConflictDoUpdate({
+        target: [FormStepsTable.id],
+        set: {
+          title: this.title,
+          description: this.description,
+          form_id: this.form.id,
+          step_order: this.step_order
+        }
+      })
+  }
+
+  async updateOrder (order: number): Promise<void> {
+    await Database.query('UPDATE form_steps SET step_order = $1 WHERE id = $2', [order, this.id])
   }
 
   async getFields (): Promise<FormField[]> {
@@ -73,7 +100,7 @@ class FormStep {
   }
 
   async removeField (field: FormField): Promise<void> {
-    await Database.query('DELETE FROM form_step_fields WHERE form_step_id = $1 AND form_field_id = $2', [this.id, field.id])
+    await Database.query('DELETE FROM form_fields WHERE id = $1', [field.id])
   }
 
   static async addStep (form: Form, step: FormStep): Promise<void> {
@@ -82,6 +109,10 @@ class FormStep {
 
   static async removeStep (form: Form, step: FormStep): Promise<void> {
     await Database.query('DELETE FROM form_steps WHERE id = $1', [step.id])
+  }
+
+  static async updateStep (form: Form, step: FormStep): Promise<void> {
+    await Database.query('UPDATE form_steps SET title = $1, description = $2 WHERE id = $3', [step.title, step.description, step.id])
   }
 }
 

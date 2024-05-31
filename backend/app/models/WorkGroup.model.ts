@@ -125,7 +125,8 @@ class WorkGroup {
 
   static async findByEnterprise (enterprise: Enterprise): Promise<WorkGroup[]> {
     const workGroups = await Database.query('SELECT * FROM work_groups WHERE enterprise_id = $1', [enterprise.id])
-    return workGroups.rows
+    const workGroupsArray = workGroups.rows.map((workGroup) => new WorkGroup(workGroup))
+    return workGroupsArray
   }
 
   async getAssignedForms (): Promise<Form[]> {

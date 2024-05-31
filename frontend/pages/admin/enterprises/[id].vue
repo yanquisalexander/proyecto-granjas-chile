@@ -151,9 +151,11 @@ const addAdminToEnterprise = async () => {
     });
 
     if (!response.ok) {
+        const errorMessage = await response.json();
+
         toast.add({
             title: 'Error al agregar administrador',
-            description: 'Ocurrió un error al agregar el administrador a la empresa. Por favor, intenta de nuevo.',
+            description: errorMessage.message ?? 'Ocurrió un error al agregar el administrador a la empresa. Por favor, intenta de nuevo.',
             color: "red",
             icon: "i-tabler-alert-triangle"
         });

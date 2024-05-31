@@ -15,29 +15,35 @@ export enum FormStatus {
 interface FormAttributes {
   id: string;
   title: string;
+  description?: string;
   form_status: FormStatus;
   custom_css?: string;
   created_at?: Date;
   updated_at?: Date;
   workgroup?: WorkGroup;
   steps?: FormStep[];
+  enterprise_id: string;
 }
 
 class Form {
   id: string;
   title: string;
+  description?: string;
   form_status: FormStatus;
   custom_css?: string;
   created_at?: Date;
   updated_at?: Date;
   workgroup?: WorkGroup;
   steps?: FormStep[];
+  enterprise_id: string;
 
   constructor(attributes: FormAttributes) {
     Object.assign(this, attributes);
     this.id = attributes.id;
     this.title = attributes.title;
     this.form_status = attributes.form_status;
+    this.description = attributes.description;
+    this.enterprise_id = attributes.enterprise_id;
   }
 
   static async getAll(): Promise<Form[]> {
@@ -52,7 +58,6 @@ class Form {
           },
           columns: {
             enterprise_id: false,
-            description: false,
             created_at: false,
             updated_at: false,
             deleted_at: false
@@ -64,7 +69,9 @@ class Form {
     return forms.map(form => new Form({
       id: form.id,
       title: form.title,
+      description: form.description ?? undefined,
       form_status: form.state,
+      enterprise_id: form.enterprise_id,
       workgroup: form.workGroup ? new WorkGroup({
         id: form.workGroup.id,
         name: form.workGroup.name,
@@ -86,7 +93,6 @@ class Form {
           },
           columns: {
             enterprise_id: false,
-            description: false,
             created_at: false,
             updated_at: false,
             deleted_at: false
@@ -98,7 +104,9 @@ class Form {
     return form ? new Form({
       id: form.id,
       title: form.title,
+      description: form.description ?? undefined,
       form_status: form.state,
+      enterprise_id: form.enterprise_id,
       workgroup: form.workGroup ? new WorkGroup({
         id: form.workGroup.id,
         name: form.workGroup.name,
@@ -110,7 +118,7 @@ class Form {
     }) : null;
   }
 
-  static async findByWorkGroupId (workGroupId: string): Promise<Form[]> {
+  static async findByWorkGroupId(workGroupId: string): Promise<Form[]> {
     const forms = await dbService.query.FormsTable.findMany({
       where: eq(FormsTable.work_group_id, workGroupId),
       with: {
@@ -120,7 +128,6 @@ class Form {
           },
           columns: {
             enterprise_id: false,
-            description: false,
             created_at: false,
             updated_at: false,
             deleted_at: false
@@ -132,7 +139,9 @@ class Form {
     return forms.map(form => new Form({
       id: form.id,
       title: form.title,
+      description: form.description ?? undefined,
       form_status: form.state,
+      enterprise_id: form.enterprise_id,
       workgroup: form.workGroup ? new WorkGroup({
         id: form.workGroup.id,
         name: form.workGroup.name,
@@ -144,12 +153,9 @@ class Form {
     }))
   }
 
-  static async getFormsToFill (workGroups: WorkGroup[]): Promise<Form[]> {
+  static async findByEnterprise(enterprise: Enterprise): Promise<Form[]> {
     const forms = await dbService.query.FormsTable.findMany({
-      where: (
-        inArray(FormsTable.work_group_id, workGroups.map(wg => wg.id)),
-        eq(FormsTable.state, FormStatus.PUBLISHED)
-    ),
+      where: eq(FormsTable.enterprise_id, enterprise.id),
       with: {
         workGroup: {
           with: {
@@ -157,7 +163,44 @@ class Form {
           },
           columns: {
             enterprise_id: false,
-            description: false,
+            created_at: false,
+            updated_at: false,
+            deleted_at: false
+          }
+        }
+      }
+    })
+
+    return forms.map(form => new Form({
+      id: form.id,
+      title: form.title,
+      description: form.description ?? undefined,
+      form_status: form.state,
+      enterprise_id: form.enterprise_id,
+      workgroup: form.workGroup ? new WorkGroup({
+        id: form.workGroup.id,
+        name: form.workGroup.name,
+        enterprise: new Enterprise({
+          id: form.workGroup.enterprise.id,
+          name: form.workGroup.enterprise.name
+        })
+      }) : undefined,
+    }))
+  }
+
+  static async getFormsToFill(workGroups: WorkGroup[]): Promise<Form[]> {
+    const forms = await dbService.query.FormsTable.findMany({
+      where: (
+        inArray(FormsTable.work_group_id, workGroups.map(wg => wg.id)),
+        eq(FormsTable.state, FormStatus.PUBLISHED)
+      ),
+      with: {
+        workGroup: {
+          with: {
+            enterprise: true,
+          },
+          columns: {
+            enterprise_id: false,
             created_at: false,
             updated_at: false,
             deleted_at: false
@@ -171,7 +214,9 @@ class Form {
     const formsToFillMapped = formsToFill.map(form => new Form({
       id: form.id,
       title: form.title,
+      description: form.description ?? undefined,
       form_status: form.state,
+      enterprise_id: form.enterprise_id,
       workgroup: form.workGroup ? new WorkGroup({
         id: form.workGroup.id,
         name: form.workGroup.name,
@@ -185,7 +230,7 @@ class Form {
     return formsToFillMapped
   }
 
-  async create (): Promise<void> {
+  async create(): Promise<void> {
     try {
       const result = await dbService
         .insert(FormsTable)
@@ -193,7 +238,8 @@ class Form {
           id: this.id,
           title: this.title,
           state: this.form_status,
-          work_group_id: this.workgroup?.id
+          work_group_id: this.workgroup?.id,
+          enterprise_id: this.enterprise_id,
         })
       if (!result) {
         throw new Error('Error creating form')
@@ -204,12 +250,13 @@ class Form {
     }
   }
 
-  async update (): Promise<void> {
+  async update(): Promise<void> {
     try {
       await dbService.update(FormsTable)
         .set({
           title: this.title,
           state: this.form_status,
+          description: this.description,
         })
         .where(eq(FormsTable.id, this.id))
     } catch (error) {
@@ -218,7 +265,7 @@ class Form {
     }
   }
 
-  async delete (): Promise<void> {
+  async delete(): Promise<void> {
     try {
       await dbService.delete(FormsTable)
         .where(eq(FormsTable.id, this.id))
@@ -228,44 +275,48 @@ class Form {
     }
   }
 
-  async getSteps (): Promise<FormStep[]> {
+  async getSteps(): Promise<FormStep[]> {
     return await FormStep.findByFormId(this.id)
   }
 
-  async addStep (step: FormStep): Promise<void> {
+  async addStep(step: FormStep): Promise<void> {
     await FormStep.addStep(this, step)
   }
 
-  async removeStep (step: FormStep): Promise<void> {
+  async removeStep(step: FormStep): Promise<void> {
     await FormStep.removeStep(this, step)
   }
 
-  async getWorkGroup (): Promise<WorkGroup> {
+  async updateStep(step: FormStep): Promise<void> {
+    await FormStep.updateStep(this, step)
+  }
+
+  async getWorkGroup(): Promise<WorkGroup> {
     if (!this.workgroup) throw new Error('This form does not have a workgroup associated')
     const workGroup = await WorkGroup.findById(this.workgroup.id)
     if (!workGroup) throw new Error('WorkGroup not found')
     return workGroup
   }
 
-  async publish (): Promise<void> {
+  async publish(): Promise<void> {
     this.form_status = FormStatus.PUBLISHED
     await this.update()
   }
 
-  async archive (): Promise<void> {
+  async archive(): Promise<void> {
     this.form_status = FormStatus.ARCHIVED
     await this.update()
   }
 
-  async isPublished (): Promise<boolean> {
+  async isPublished(): Promise<boolean> {
     return this.form_status === FormStatus.PUBLISHED
   }
 
-  async isArchived (): Promise<boolean> {
+  async isArchived(): Promise<boolean> {
     return this.form_status === FormStatus.ARCHIVED
   }
 
-  async isDraft (): Promise<boolean> {
+  async isDraft(): Promise<boolean> {
     return this.form_status === FormStatus.DRAFT
   }
 }

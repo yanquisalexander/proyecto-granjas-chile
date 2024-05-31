@@ -2,6 +2,8 @@ import { Div, Text, Input } from "react-native-magnus";
 import { ShortText } from "./fields/ShortText";
 import { YesNo } from "./fields/YesNo";
 import { formServices } from "@/services/forms";
+import { Scale } from "./fields/Scale";
+import { Image as ImageField } from "./fields/Image";
 
 export const FormField = ({ field, updateFieldValue, isFormLocked, formDraft }: { field: any, updateFieldValue: Function, isFormLocked: boolean, formDraft: any }) => {
 
@@ -17,6 +19,8 @@ export const FormField = ({ field, updateFieldValue, isFormLocked, formDraft }: 
     const COMPONENT_MAP: any = {
         "short_text": ShortText,
         "yes_no": YesNo,
+        "scale": Scale,
+        "image": ImageField
     }
 
     const Component = COMPONENT_MAP[field_type];

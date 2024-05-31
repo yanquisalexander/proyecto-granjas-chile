@@ -4,5 +4,7 @@ export type FieldOptions = {
     minLength?: number;
     maxImages?: number;
     maxFiles?: number;
+    min?: number;
+    max?: number;
     format?: string;
 }
