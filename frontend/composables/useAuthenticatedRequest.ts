@@ -1,10 +1,10 @@
 import axios from "axios";
-import { Configuration } from "~/config";
 
 export const useAuthenticatedRequest = () => {
+    const runtimeConfig = useRuntimeConfig();
     const { token } = useAuth();
     const axiosInstance = axios.create({
-        baseURL: Configuration.BACKEND_URL,
+        baseURL: runtimeConfig.public.backendURL as string || 'http://localhost:3000',
         headers: {
             Authorization: token.value,
         }
