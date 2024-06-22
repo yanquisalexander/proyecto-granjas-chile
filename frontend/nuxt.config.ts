@@ -9,6 +9,9 @@ export default defineNuxtConfig({
     '@sidebase/nuxt-auth',
     '@nuxt/eslint',
   ],
+  colorMode: {
+    preference: 'light'
+  },
   experimental: {
     viewTransition: false,
   },

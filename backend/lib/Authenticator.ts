@@ -6,7 +6,7 @@ import { Configuration } from '@/config'
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken';
 import chalk from 'chalk'
-import { Request, Response, NextFunction } from 'express'
+import e, { Request, Response, NextFunction } from 'express'
 import { UUID } from 'node:crypto'
 import passport from 'passport'
 import { Strategy as JwtStrategy, ExtractJwt } from 'passport-jwt'
@@ -94,7 +94,8 @@ export class Authenticator {
         console.log(' 😐User:', user)
         res.status(401).json({
           errors: [
-            "Looks like you're not authenticated. Please log in and try again."
+            "Looks like you're not authenticated. Please log in and try again.",
+            err.message
           ],
           error_type: err
         })
