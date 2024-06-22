@@ -121,14 +121,14 @@ const users = ref<User[]>([]);
 const selectedAdminToAdd = ref<string | null>(null);
 const { id } = route.params;
 
-
+const config = useRuntimeConfig();
 watch(addAdminModal, async (value) => {
     if (value) await fetchUsers();
 });
 
 const fetchUsers = async () => {
     if (!token.value) return;
-    const response = await fetch(`${Configuration.BACKEND_URL}/admin/users`, {
+    const response = await fetch(`${config.public.backendUrl}/admin/users`, {
         headers: {
             'Authorization': token.value
         }
