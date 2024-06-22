@@ -49,10 +49,20 @@ export const useEnterprises = () => {
         }
     }
 
+    const createEnterprise = async (enterprise: Enterprise): Promise<void> => {
+        try {
+            await client.post('/admin/enterprises', enterprise);
+        } catch (error) {
+            // Handle error here (e.g., console.error, throw specific error)
+            console.error('Error creating enterprise:', error);
+        }
+    }
+
     return {
         getEnterprises,
         deleteEnterprise,
         getEnterprise,
-        updateEnterprise
+        updateEnterprise,
+        createEnterprise,
     };
 };

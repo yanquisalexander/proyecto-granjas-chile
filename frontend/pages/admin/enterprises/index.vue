@@ -130,7 +130,7 @@
 import { Configuration } from "~/config";
 import { type Enterprise } from "~/types";
 
-const { getEnterprises, deleteEnterprise } = useEnterprises()
+const { getEnterprises, deleteEnterprise, createEnterprise: create } = useEnterprises()
 
 const { token } = useAuth()
 const toast = useToast()
@@ -218,34 +218,13 @@ const createEnterprise = async () => {
     creatingEnterprise.value = true
     if (!token.value) return
     try {
-        const response = await fetch(`${Configuration.BACKEND_URL}/admin/enterprises`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': token.value
-            },
-            body: JSON.stringify({
-                name: newEnterprise.value.name
-            })
+        await create(newEnterprise.value)
+        toast.add({
+            title: 'Empresa creada',
+            description: 'La empresa ha sido creada exitosamente',
+            color: "green",
+            icon: "i-tabler-building"
         })
-
-        if (response.ok) {
-            toast.add({
-                title: 'Empresa creada',
-                description: 'La empresa ha sido creada exitosamente',
-                color: "green",
-                icon: "i-tabler-building"
-            })
-        } else {
-            const res = await response.json()
-            toast.add({
-                title: 'Error al crear empresa',
-                description: res.message,
-                color: "red",
-                icon: "i-tabler-building"
-            })
-        }
-
 
 
         showCreateEnterprise.value = false
